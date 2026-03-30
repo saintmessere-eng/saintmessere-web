@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Card from '../components/Card.astro';
 ---
 
 <Layout title="Saint Messere - Curaduría de frecuencias y luz">
@@ -25,101 +24,27 @@ import Card from '../components/Card.astro';
 		<nav class="links">
 			<a href="/musica" class="link-item">Audition</a>
 			<a href="/galeria" class="link-item">Gallery</a>
-			<a href="https://instagram.com/tu_instagram_aqui" target="_blank" class="link-item">Instagram</a>
+			<a href="https://instagram.com/saintmessere" target="_blank" class="link-item">Instagram</a>
 		</nav>
 	</main>
 </Layout>
 
 <style>
-	:root {
-		--bg-color: #0d0d0d; /* Negro mate profundo */
-		--text-color: #e0e0e0; /* Blanco roto suave */
-		--accent-color: #f2f2f2; /* Blanco más brillante para títulos */
-		--font-serif: 'Playfair Display', serif; /* Debes cargar esta fuente o una similar */
-		--font-sans: 'Inter', sans-serif;
-	}
-
 	body {
-		background-color: var(--bg-color);
-		color: var(--text-color);
-		font-family: var(--font-sans);
+		background-color: #0d0d0d;
+		color: #e0e0e0;
+		font-family: sans-serif;
 		margin: 0;
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		min-height: 100vh;
-		padding: 2rem;
 	}
-
-	main {
-		max-width: 800px;
-		text-align: center;
-	}
-
-	header {
-		margin-bottom: 4rem;
-	}
-
-	h1 {
-		font-family: var(--font-serif);
-		font-size: 3.5rem;
-		font-weight: 300;
-		text-transform: uppercase;
-		letter-spacing: 0.3em;
-		color: var(--accent-color);
-		margin: 0;
-	}
-
-	.subtitle {
-		font-family: var(--font-sans);
-		font-size: 1rem;
-		font-weight: 300;
-		text-transform: uppercase;
-		letter-spacing: 0.15em;
-		color: #888;
-		margin-top: 1rem;
-	}
-
-	.manifesto {
-		font-family: var(--font-serif);
-		font-size: 1.5rem;
-		font-weight: 300;
-		line-height: 1.8;
-		font-style: italic;
-		margin-bottom: 5rem;
-		color: #ccc;
-	}
-
-	.manifesto p {
-		margin-bottom: 1.5rem;
-	}
-
-	.botanical {
-		font-size: 1.1rem;
-		font-style: normal;
-		margin-top: 2rem;
-		color: #888;
-	}
-
-	.links {
-		display: flex;
-		justify-content: center;
-		gap: 3rem;
-		margin-top: 3rem;
-	}
-
-	.link-item {
-		font-family: var(--font-sans);
-		font-size: 0.9rem;
-		font-weight: 400;
-		text-transform: uppercase;
-		letter-spacing: 0.2em;
-		color: #888;
-		text-decoration: none;
-		transition: color 0.3s ease;
-	}
-
-	.link-item:hover {
-		color: var(--accent-color);
-	}
+	main { max-width: 800px; text-align: center; padding: 2rem; }
+	h1 { font-size: 3rem; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; }
+	.subtitle { color: #888; letter-spacing: 0.1em; margin-bottom: 3rem; }
+	.manifesto { font-style: italic; font-size: 1.25rem; line-height: 1.8; margin-bottom: 3rem; }
+	.links { display: flex; justify-content: center; gap: 2rem; }
+	.link-item { color: #888; text-decoration: none; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; }
+	.link-item:hover { color: #fff; }
 </style>
