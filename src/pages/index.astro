@@ -1,50 +1,50 @@
 ---
-import Layout from '../layouts/Layout.astro';
+// Archivo autónomo para Saint Messere
 ---
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Saint Messere - Curaduría de frecuencias y luz</title>
+		<style>
+			body {
+				background-color: #0d0d0d;
+				color: #e0e0e0;
+				font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+				margin: 0;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-height: 100vh;
+			}
+			main { max-width: 800px; text-align: center; padding: 2rem; }
+			h1 { font-size: 3rem; font-weight: 200; letter-spacing: 0.4em; text-transform: uppercase; color: #fff; margin-bottom: 0.5rem; }
+			.subtitle { color: #666; font-size: 0.9rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4rem; }
+			.manifesto { font-style: italic; font-size: 1.4rem; line-height: 1.8; margin-bottom: 4rem; font-weight: 300; }
+			.botanical { font-size: 1rem; color: #555; font-style: normal; margin-top: 2rem; }
+			.links { display: flex; justify-content: center; gap: 3rem; margin-top: 2rem; }
+			.link-item { color: #888; text-decoration: none; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.2em; transition: 0.3s; }
+			.link-item:hover { color: #fff; }
+		</style>
+	</head>
+	<body>
+		<main>
+			<header>
+				<h1>Saint Messere</h1>
+				<p class="subtitle">Curaduría de Frecuencias y Luz</p>
+			</header>
 
-<Layout title="Saint Messere - Curaduría de frecuencias y luz">
-	<main>
-		<header>
-			<h1>Saint Messere</h1>
-			<p class="subtitle">Curaduría de Frecuencias y Luz</p>
-		</header>
+			<section class="manifesto">
+				<p>"No es solo el beat, es la arquitectura del silencio que lo precede."</p>
+				<p>Entre el Minimal y el House, Saint Messere habita el espacio donde la técnica se vuelve sátira y la elegancia, una declaración de principios.</p>
+				<p class="botanical">Fotografía botánica y abstracta que captura lo que el ojo ignora. Música que dicta el ritmo de lo que está por venir.</p>
+			</section>
 
-		<section class="manifesto">
-			<p>
-				"No es solo el beat, es la arquitectura del silencio que lo precede."
-			</p>
-			<p>
-				Entre el Minimal y el House, Saint Messere habita el espacio donde la técnica se vuelve sátira y la elegancia, una declaración de principios.
-			</p>
-			<p class="botanical">
-				Fotografía botánica y abstracta que captura lo que el ojo ignora. Música que dicta el ritmo de lo que está por venir.
-			</p>
-		</section>
-
-		<nav class="links">
-			<a href="/musica" class="link-item">Audition</a>
-			<a href="/galeria" class="link-item">Gallery</a>
-			<a href="https://instagram.com/saintmessere" target="_blank" class="link-item">Instagram</a>
-		</nav>
-	</main>
-</Layout>
-
-<style>
-	body {
-		background-color: #0d0d0d;
-		color: #e0e0e0;
-		font-family: sans-serif;
-		margin: 0;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		min-height: 100vh;
-	}
-	main { max-width: 800px; text-align: center; padding: 2rem; }
-	h1 { font-size: 3rem; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; }
-	.subtitle { color: #888; letter-spacing: 0.1em; margin-bottom: 3rem; }
-	.manifesto { font-style: italic; font-size: 1.25rem; line-height: 1.8; margin-bottom: 3rem; }
-	.links { display: flex; justify-content: center; gap: 2rem; }
-	.link-item { color: #888; text-decoration: none; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; }
-	.link-item:hover { color: #fff; }
-</style>
+			<nav class="links">
+				<a href="#" class="link-item">Audition</a>
+				<a href="#" class="link-item">Gallery</a>
+				<a href="https://instagram.com/saintmessere" target="_blank" class="link-item">Instagram</a>
+			</nav>
+		</main>
+	</body>
+</html>
