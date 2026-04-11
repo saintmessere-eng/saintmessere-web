@@ -1,5 +1,5 @@
 ---
-// Saint Messere — gallery.astro
+// Saint Messere — gallery.astro — sistema orbital
 ---
 <html lang="es">
 <head>
@@ -19,8 +19,7 @@
     }
 
     html, body {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       overflow: hidden;
       background: var(--bg);
       color: var(--ink);
@@ -34,13 +33,12 @@
       inset: 0;
       pointer-events: none;
       z-index: 1;
-      opacity: 0.03;
+      opacity: 0.025;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     .cursor {
-      width: 8px;
-      height: 8px;
+      width: 8px; height: 8px;
       background: var(--ink);
       border-radius: 50%;
       position: fixed;
@@ -49,8 +47,7 @@
       transform: translate(-50%, -50%);
     }
     .cursor-ring {
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       border: 1px solid rgba(232,228,220,0.35);
       border-radius: 50%;
       position: fixed;
@@ -62,9 +59,7 @@
 
     nav {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       z-index: 100;
       padding: 28px 48px;
       display: flex;
@@ -90,105 +85,106 @@
     }
     .nav-back:hover { color: var(--ink); }
 
+    /* ── Stage ── */
     .stage {
       position: fixed;
       inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      perspective: 1200px;
+      perspective: 900px;
       perspective-origin: 50% 50%;
     }
 
-    .carousel {
-      position: relative;
-      width: 340px;
-      height: 440px;
+    .universe {
+      position: absolute;
+      left: 50%; top: 50%;
       transform-style: preserve-3d;
       will-change: transform;
     }
 
     .card {
       position: absolute;
-      width: 300px;
-      height: 400px;
-      left: 50%;
-      top: 50%;
-      margin-left: -150px;
-      margin-top: -200px;
+      width: 260px;
+      height: 340px;
+      margin-left: -130px;
+      margin-top: -170px;
       transform-style: preserve-3d;
       cursor: pointer;
+      transition: outline 0.3s;
     }
 
     .card img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: cover;
       display: block;
-      filter: grayscale(15%) contrast(1.05);
+      border: 1px solid rgba(232,228,220,0.07);
       transition: filter 0.5s ease;
-      border: 1px solid rgba(232,228,220,0.08);
     }
 
-    .card:hover img { filter: grayscale(0%) contrast(1.1); }
+    .card.front img { filter: grayscale(0%) contrast(1.08); }
+    .card:not(.front) img { filter: grayscale(30%) contrast(0.95) brightness(0.7); }
 
     .card-num {
       position: absolute;
-      bottom: -28px;
+      bottom: -26px;
       left: 0;
       font-family: var(--mono);
-      font-size: 10px;
+      font-size: 9px;
       letter-spacing: 0.3em;
-      color: rgba(232,228,220,0.2);
+      color: rgba(232,228,220,0.18);
     }
 
+    /* ── Orbital rings SVG background ── */
+    .rings {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.04;
+    }
+
+    /* ── HUD ── */
     .hud {
       position: fixed;
-      bottom: 40px;
+      bottom: 36px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       z-index: 100;
       pointer-events: none;
     }
-
     .hud-counter {
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.2em;
-      color: rgba(232,228,220,0.25);
+      color: rgba(232,228,220,0.2);
     }
-
     .hud-dots {
       display: flex;
       gap: 8px;
       pointer-events: all;
     }
-
     .hud-dot {
-      width: 4px;
-      height: 4px;
+      width: 4px; height: 4px;
       border-radius: 50%;
-      background: rgba(232,228,220,0.2);
+      background: rgba(232,228,220,0.18);
       cursor: pointer;
       transition: background 0.3s, transform 0.3s;
     }
     .hud-dot.active {
-      background: rgba(232,228,220,0.8);
-      transform: scale(1.4);
+      background: rgba(232,228,220,0.75);
+      transform: scale(1.5);
     }
-
     .hud-hint {
       font-family: var(--mono);
       font-size: 9px;
-      letter-spacing: 0.35em;
-      color: rgba(232,228,220,0.15);
+      letter-spacing: 0.3em;
+      color: rgba(232,228,220,0.12);
       text-transform: uppercase;
     }
 
+    /* ── Lightbox ── */
     .lightbox {
       position: fixed;
       inset: 0;
@@ -205,8 +201,7 @@
     .lightbox img { max-width: 85vw; max-height: 85vh; object-fit: contain; }
     .lightbox-close {
       position: absolute;
-      top: 32px;
-      right: 48px;
+      top: 32px; right: 48px;
       font-family: var(--mono);
       font-size: 11px;
       letter-spacing: 0.3em;
@@ -219,8 +214,7 @@
 
     @media (max-width: 600px) {
       nav { padding: 20px 24px; }
-      .card { width: 240px; height: 320px; margin-left: -120px; margin-top: -160px; }
-      .carousel { width: 260px; height: 340px; }
+      .card { width: 200px; height: 270px; margin-left: -100px; margin-top: -135px; }
     }
   </style>
 </head>
@@ -229,43 +223,52 @@
   <div class="cursor" id="cursor"></div>
   <div class="cursor-ring" id="cursorRing"></div>
 
+  <!-- Anillos de fondo -->
+  <svg class="rings" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <ellipse cx="720" cy="450" rx="580" ry="180" fill="none" stroke="#e8e4dc" stroke-width="1" transform="rotate(-12 720 450)"/>
+    <ellipse cx="720" cy="450" rx="420" ry="130" fill="none" stroke="#e8e4dc" stroke-width="0.8" transform="rotate(28 720 450)"/>
+    <ellipse cx="720" cy="450" rx="280" ry="85" fill="none" stroke="#e8e4dc" stroke-width="0.6" transform="rotate(-45 720 450)"/>
+    <ellipse cx="720" cy="450" rx="160" ry="50" fill="none" stroke="#e8e4dc" stroke-width="0.5" transform="rotate(70 720 450)"/>
+    <ellipse cx="720" cy="450" rx="700" ry="220" fill="none" stroke="#e8e4dc" stroke-width="0.4" transform="rotate(8 720 450)"/>
+  </svg>
+
   <nav>
     <a href="/" class="nav-logo">Saint Messere</a>
     <a href="/" class="nav-back">← Volver</a>
   </nav>
 
   <div class="stage">
-    <div class="carousel" id="carousel">
+    <div class="universe" id="universe">
       <div class="card" data-index="0">
-        <img src="/images/lucid-origin_Full_body_shot_from_behind_a_tall_figure_in_a_dark_tailored_suit_standing_at_the-0.jpg" alt="I" loading="eager" />
+        <img src="/images/lucid-origin_Full_body_shot_from_behind_a_tall_figure_in_a_dark_tailored_suit_standing_at_the-0.jpg" alt="I" loading="eager"/>
         <span class="card-num">01</span>
       </div>
       <div class="card" data-index="1">
-        <img src="/images/Gemini_Generated_Image_emosanemosanemos.png" alt="II" loading="lazy" />
+        <img src="/images/Gemini_Generated_Image_emosanemosanemos.png" alt="II" loading="lazy"/>
         <span class="card-num">02</span>
       </div>
       <div class="card" data-index="2">
-        <img src="/images/kling_20260411_作品_Image1rans_2920_0.png" alt="III" loading="lazy" />
+        <img src="/images/kling_20260411_作品_Image1rans_2920_0.png" alt="III" loading="lazy"/>
         <span class="card-num">03</span>
       </div>
       <div class="card" data-index="3">
-        <img src="/images/Gemini_Generated_Image_kv0wphkv0wphkv0w.png" alt="IV" loading="lazy" />
+        <img src="/images/Gemini_Generated_Image_kv0wphkv0wphkv0w.png" alt="IV" loading="lazy"/>
         <span class="card-num">04</span>
       </div>
       <div class="card" data-index="4">
-        <img src="/images/kling_20260411_作品_Image1rans_2920_1.png" alt="V" loading="lazy" />
+        <img src="/images/kling_20260411_作品_Image1rans_2920_1.png" alt="V" loading="lazy"/>
         <span class="card-num">05</span>
       </div>
       <div class="card" data-index="5">
-        <img src="/images/Gemini_Generated_Image_t2k9a2t2k9a2t2k9 (1).png" alt="VI" loading="lazy" />
+        <img src="/images/Gemini_Generated_Image_t2k9a2t2k9a2t2k9 (1).png" alt="VI" loading="lazy"/>
         <span class="card-num">06</span>
       </div>
       <div class="card" data-index="6">
-        <img src="/images/Gemini_Generated_Image_yhvcpuyhvcpuyhvc.png" alt="VII" loading="lazy" />
+        <img src="/images/Gemini_Generated_Image_yhvcpuyhvcpuyhvc.png" alt="VII" loading="lazy"/>
         <span class="card-num">07</span>
       </div>
       <div class="card" data-index="7">
-        <img src="/images/Gemini_Generated_Image_zcu36mzcu36mzcu3.png" alt="VIII" loading="lazy" />
+        <img src="/images/Gemini_Generated_Image_zcu36mzcu36mzcu3.png" alt="VIII" loading="lazy"/>
         <span class="card-num">08</span>
       </div>
     </div>
@@ -279,19 +282,20 @@
 
   <div class="lightbox" id="lightbox">
     <div class="lightbox-close" id="lbClose">Cerrar</div>
-    <img id="lbImg" src="" alt="" />
+    <img id="lbImg" src="" alt=""/>
   </div>
 
   <script>
     const N = 8;
-    const carousel = document.getElementById('carousel');
-    const cards = Array.from(carousel.querySelectorAll('.card'));
+    const universe = document.getElementById('universe');
+    const cards = Array.from(universe.querySelectorAll('.card'));
     const counter = document.getElementById('counter');
     const dotsWrap = document.getElementById('dots');
     const lightbox = document.getElementById('lightbox');
     const lbImg = document.getElementById('lbImg');
     const lbClose = document.getElementById('lbClose');
 
+    // Cursor
     const cur = document.getElementById('cursor');
     const ring = document.getElementById('cursorRing');
     let mx = 0, my = 0, rx = 0, ry = 0;
@@ -305,6 +309,7 @@
       requestAnimationFrame(animR);
     })();
 
+    // Dots
     const dots = [];
     for (let i = 0; i < N; i++) {
       const d = document.createElement('div');
@@ -314,98 +319,126 @@
       dots.push(d);
     }
 
-    const angleStep = (2 * Math.PI) / N;
-    const radius = 600;
+    // Cada foto tiene su propio anillo — radio, inclinación y fase únicos
+    // El "caos" viene de las inclinaciones distintas y radios irregulares
+    const orbits = [
+      { radius: 480, tiltX: 15,  tiltY: -8,  tiltZ: 12  },
+      { radius: 380, tiltX: -40, tiltY: 20,  tiltZ: -5  },
+      { radius: 520, tiltX: 55,  tiltY: -15, tiltZ: 30  },
+      { radius: 310, tiltX: -20, tiltY: 35,  tiltZ: -25 },
+      { radius: 450, tiltX: 70,  tiltY: -5,  tiltZ: 18  },
+      { radius: 340, tiltX: -35, tiltY: 50,  tiltZ: -40 },
+      { radius: 500, tiltX: 25,  tiltY: -60, tiltZ: 8   },
+      { radius: 280, tiltX: -55, tiltY: 30,  tiltZ: -20 },
+    ];
 
-    function positionCards(rotY) {
-      cards.forEach((card, i) => {
-        const angle = angleStep * i + rotY;
-        const x = Math.sin(angle) * radius;
-        const z = Math.cos(angle) * radius - radius;
-        const scale = 0.5 + 0.5 * ((Math.cos(angle) + 1) / 2);
-        const opacity = 0.15 + 0.85 * ((Math.cos(angle) + 1) / 2);
-        card.style.transform = `translateX(${x}px) translateZ(${z}px) scale(${scale})`;
-        card.style.opacity = opacity;
-        card.style.zIndex = Math.round(scale * 10);
-      });
-    }
-
-    let currentAngle = 0;
+    const baseAngles = cards.map((_, i) => (i / N) * Math.PI * 2);
+    let masterAngle = 0;
     let targetAngle = 0;
+    let activeIdx = 0;
 
-    function getActiveIndex() {
-      let a = ((-targetAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-      let idx = Math.round(a / angleStep) % N;
-      return ((idx % N) + N) % N;
-    }
+    function positionCards(angle) {
+      let frontZ = -Infinity;
+      let frontIdx = 0;
 
-    function updateHUD() {
-      const idx = getActiveIndex();
-      counter.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
-      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      cards.forEach((card, i) => {
+        const orbit = orbits[i];
+        const a = baseAngles[i] + angle;
+
+        // Posición en el anillo propio — inclinado en 3D
+        const cosA = Math.cos(a);
+        const sinA = Math.sin(a);
+
+        // Punto en anillo plano
+        let x = sinA * orbit.radius;
+        let y = 0;
+        let z = cosA * orbit.radius;
+
+        // Aplicar inclinaciones del anillo (rotaciones 3D simples)
+        const txRad = (orbit.tiltX * Math.PI) / 180;
+        const tyRad = (orbit.tiltY * Math.PI) / 180;
+        const tzRad = (orbit.tiltZ * Math.PI) / 180;
+
+        // RotX
+        let y2 = y * Math.cos(txRad) - z * Math.sin(txRad);
+        let z2 = y * Math.sin(txRad) + z * Math.cos(txRad);
+        y = y2; z = z2;
+
+        // RotY
+        let x3 = x * Math.cos(tyRad) + z * Math.sin(tyRad);
+        let z3 = -x * Math.sin(tyRad) + z * Math.cos(tyRad);
+        x = x3; z = z3;
+
+        // RotZ
+        let x4 = x * Math.cos(tzRad) - y * Math.sin(tzRad);
+        let y4 = x * Math.sin(tzRad) + y * Math.cos(tzRad);
+        x = x4; y = y4;
+
+        // Escala y opacidad por profundidad
+        const zNorm = (z + orbit.radius) / (orbit.radius * 2);
+        const scale = 0.38 + 0.62 * zNorm;
+        const opacity = 0.1 + 0.9 * zNorm;
+
+        card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.zIndex = Math.round(zNorm * 100);
+
+        if (z > frontZ) { frontZ = z; frontIdx = i; }
+      });
+
+      // Marcar la carta más al frente
+      cards.forEach((c, i) => c.classList.toggle('front', i === frontIdx));
+      activeIdx = frontIdx;
+      counter.textContent = String(frontIdx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+      dots.forEach((d, i) => d.classList.toggle('active', i === frontIdx));
     }
 
     function goTo(index) {
-      const current = getActiveIndex();
-      let diff = index - current;
-      if (diff > N / 2) diff -= N;
-      if (diff < -N / 2) diff += N;
-      targetAngle -= diff * angleStep;
-      updateHUD();
+      const diff = index - activeIdx;
+      const step = (2 * Math.PI) / N;
+      targetAngle -= diff * step;
     }
 
+    // Loop
     (function loop() {
-      currentAngle += (targetAngle - currentAngle) * 0.08;
-      positionCards(currentAngle);
+      masterAngle += (targetAngle - masterAngle) * 0.07;
+      positionCards(masterAngle);
       requestAnimationFrame(loop);
     })();
 
+    // Scroll
     window.addEventListener('wheel', e => {
       e.preventDefault();
-      targetAngle -= e.deltaY * 0.003;
-      updateHUD();
+      targetAngle -= e.deltaY * 0.004;
     }, { passive: false });
 
-    let dragging = false;
-    let dragStartX = 0;
-    let dragStartAngle = 0;
-    let didDrag = false;
-
+    // Drag
+    let dragging = false, dragX = 0, dragAngle = 0, didDrag = false;
     document.addEventListener('mousedown', e => {
       if (lightbox.classList.contains('active')) return;
-      dragging = true;
-      didDrag = false;
-      dragStartX = e.clientX;
-      dragStartAngle = targetAngle;
+      dragging = true; didDrag = false;
+      dragX = e.clientX; dragAngle = targetAngle;
     });
-
     document.addEventListener('mousemove', e => {
       if (!dragging) return;
-      const dx = e.clientX - dragStartX;
+      const dx = e.clientX - dragX;
       if (Math.abs(dx) > 4) didDrag = true;
-      targetAngle = dragStartAngle + dx * 0.005;
-      updateHUD();
+      targetAngle = dragAngle + dx * 0.006;
     });
-
     document.addEventListener('mouseup', () => { dragging = false; });
 
-    let touchStartX = 0;
-    let touchStartAngle = 0;
-    document.addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
-      touchStartAngle = targetAngle;
-    }, { passive: true });
+    // Touch
+    let tX = 0, tAngle = 0;
+    document.addEventListener('touchstart', e => { tX = e.touches[0].clientX; tAngle = targetAngle; }, { passive: true });
     document.addEventListener('touchmove', e => {
-      const dx = e.touches[0].clientX - touchStartX;
-      targetAngle = touchStartAngle + dx * 0.005;
-      updateHUD();
+      targetAngle = tAngle + (e.touches[0].clientX - tX) * 0.006;
     }, { passive: true });
 
+    // Click → lightbox o traer al frente
     cards.forEach((card, i) => {
       card.addEventListener('click', () => {
         if (didDrag) return;
-        const idx = getActiveIndex();
-        if (i !== idx) { goTo(i); return; }
+        if (i !== activeIdx) { goTo(i); return; }
         lbImg.src = card.querySelector('img').src;
         lightbox.classList.add('active');
       });
@@ -414,12 +447,11 @@
     lbClose.addEventListener('click', () => lightbox.classList.remove('active'));
     lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('active'); });
     document.addEventListener('keydown', e => {
+      const step = (2 * Math.PI) / N;
       if (e.key === 'Escape') lightbox.classList.remove('active');
-      if (e.key === 'ArrowRight') { targetAngle -= angleStep; updateHUD(); }
-      if (e.key === 'ArrowLeft')  { targetAngle += angleStep; updateHUD(); }
+      if (e.key === 'ArrowRight') targetAngle -= step;
+      if (e.key === 'ArrowLeft')  targetAngle += step;
     });
-
-    updateHUD();
   </script>
 
 </body>
