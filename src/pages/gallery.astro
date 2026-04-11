@@ -5,6 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <title>Gallery — Saint Messere</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,25 +13,31 @@
     :root {
       --ink: #e8e4dc;
       --ink-dim: rgba(232,228,220,0.3);
-      --ink-ghost: rgba(232,228,220,0.06);
       --bg: #0a0a0a;
-      --bg-alt: #0d0d0d;
       --mono: 'Courier New', monospace;
       --serif: 'Georgia', serif;
     }
 
-    html { scroll-behavior: smooth; }
-
-    body {
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       background: var(--bg);
       color: var(--ink);
       font-family: var(--serif);
-      overflow-x: hidden;
       cursor: none;
-      min-height: 100vh;
     }
 
-    /* ── Cursor ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
     .cursor {
       width: 8px;
       height: 8px;
@@ -50,21 +57,9 @@
       pointer-events: none;
       z-index: 9998;
       transform: translate(-50%, -50%);
-      transition: width 0.2s, height 0.2s, border-color 0.2s;
+      transition: width 0.2s, height 0.2s;
     }
 
-    /* ── Noise ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
-
-    /* ── Nav ── */
     nav {
       position: fixed;
       top: 0;
@@ -75,18 +70,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+      background: linear-gradient(to bottom, rgba(10,10,10,0.9), transparent);
     }
-
     .nav-logo {
       font-family: var(--serif);
       font-size: 16px;
-      font-weight: 400;
       color: var(--ink);
       text-decoration: none;
       letter-spacing: 0.05em;
     }
-
     .nav-back {
       font-family: var(--mono);
       font-size: 10px;
@@ -98,106 +90,109 @@
     }
     .nav-back:hover { color: var(--ink); }
 
-    /* ── Header ── */
-    .header {
-      padding: 160px 48px 80px;
-      max-width: 900px;
-    }
-
-    .header-eyebrow {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.4em;
-      color: var(--ink-dim);
-      text-transform: uppercase;
-      margin-bottom: 24px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.9s ease;
-    }
-
-    .header-title {
-      font-size: clamp(48px, 8vw, 100px);
-      font-weight: 400;
-      line-height: 0.9;
-      letter-spacing: -0.02em;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 1s ease 0.15s;
-    }
-
-    .header-title em {
-      font-style: italic;
-      color: rgba(232,228,220,0.2);
-    }
-
-    /* ── Gallery grid ── */
-    .gallery {
-      padding: 0 48px 120px;
-      columns: 2;
-      column-gap: 2px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .gallery-item {
-      break-inside: avoid;
-      margin-bottom: 2px;
-      overflow: hidden;
-      position: relative;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.9s ease, transform 0.9s ease;
-    }
-
-    .gallery-item.visible {
-      opacity: 1;
-      transform: none;
-    }
-
-    .gallery-item img {
-      width: 100%;
-      display: block;
-      filter: grayscale(20%) contrast(1.05);
-      transition: filter 0.6s ease, transform 0.6s ease;
-    }
-
-    .gallery-item:hover img {
-      filter: grayscale(0%) contrast(1.1);
-      transform: scale(1.02);
-    }
-
-    .gallery-item-overlay {
-      position: absolute;
+    .stage {
+      position: fixed;
       inset: 0;
-      background: rgba(10,10,10,0);
-      transition: background 0.4s ease;
       display: flex;
-      align-items: flex-end;
-      padding: 24px;
+      align-items: center;
+      justify-content: center;
+      perspective: 1200px;
+      perspective-origin: 50% 50%;
     }
 
-    .gallery-item:hover .gallery-item-overlay {
-      background: rgba(10,10,10,0.4);
+    .carousel {
+      position: relative;
+      width: 340px;
+      height: 440px;
+      transform-style: preserve-3d;
+      will-change: transform;
     }
 
-    .gallery-item-num {
+    .card {
+      position: absolute;
+      width: 300px;
+      height: 400px;
+      left: 50%;
+      top: 50%;
+      margin-left: -150px;
+      margin-top: -200px;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: grayscale(15%) contrast(1.05);
+      transition: filter 0.5s ease;
+      border: 1px solid rgba(232,228,220,0.08);
+    }
+
+    .card:hover img { filter: grayscale(0%) contrast(1.1); }
+
+    .card-num {
+      position: absolute;
+      bottom: -28px;
+      left: 0;
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.3em;
-      color: rgba(232,228,220,0);
-      transition: color 0.4s ease;
+      color: rgba(232,228,220,0.2);
     }
 
-    .gallery-item:hover .gallery-item-num {
-      color: rgba(232,228,220,0.5);
+    .hud {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+      pointer-events: none;
     }
 
-    /* ── Lightbox ── */
+    .hud-counter {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: rgba(232,228,220,0.25);
+    }
+
+    .hud-dots {
+      display: flex;
+      gap: 8px;
+      pointer-events: all;
+    }
+
+    .hud-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(232,228,220,0.2);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .hud-dot.active {
+      background: rgba(232,228,220,0.8);
+      transform: scale(1.4);
+    }
+
+    .hud-hint {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      color: rgba(232,228,220,0.15);
+      text-transform: uppercase;
+    }
+
     .lightbox {
       position: fixed;
       inset: 0;
-      background: rgba(10,10,10,0.96);
+      background: rgba(10,10,10,0.97);
       z-index: 1000;
       display: flex;
       align-items: center;
@@ -206,19 +201,8 @@
       pointer-events: none;
       transition: opacity 0.4s ease;
     }
-
-    .lightbox.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .lightbox img {
-      max-width: 85vw;
-      max-height: 85vh;
-      object-fit: contain;
-      filter: grayscale(10%) contrast(1.05);
-    }
-
+    .lightbox.active { opacity: 1; pointer-events: all; }
+    .lightbox img { max-width: 85vw; max-height: 85vh; object-fit: contain; }
     .lightbox-close {
       position: absolute;
       top: 32px;
@@ -233,67 +217,10 @@
     }
     .lightbox-close:hover { color: var(--ink); }
 
-    .lightbox-nav {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 32px;
-    }
-
-    .lightbox-btn {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      color: var(--ink-dim);
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: color 0.3s;
-      background: none;
-      border: none;
-    }
-    .lightbox-btn:hover { color: var(--ink); }
-
-    /* ── Footer ── */
-    footer {
-      padding: 48px;
-      border-top: 1px solid var(--ink-ghost);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .footer-sig {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      color: rgba(232,228,220,0.15);
-      text-transform: uppercase;
-    }
-
-    .footer-link {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      color: var(--ink-dim);
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: color 0.3s;
-    }
-    .footer-link:hover { color: var(--ink); }
-
-    /* ── Reveal ── */
-    .visible {
-      opacity: 1 !important;
-      transform: none !important;
-    }
-
-    @media (max-width: 680px) {
+    @media (max-width: 600px) {
       nav { padding: 20px 24px; }
-      .header { padding: 120px 24px 60px; }
-      .gallery { columns: 1; padding: 0 24px 80px; }
-      footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
+      .card { width: 240px; height: 320px; margin-left: -120px; margin-top: -160px; }
+      .carousel { width: 260px; height: 340px; }
     }
   </style>
 </head>
@@ -302,179 +229,197 @@
   <div class="cursor" id="cursor"></div>
   <div class="cursor-ring" id="cursorRing"></div>
 
-  <!-- Lightbox -->
-  <div class="lightbox" id="lightbox">
-    <div class="lightbox-close" id="lightboxClose">Cerrar</div>
-    <img id="lightboxImg" src="" alt="" />
-    <div class="lightbox-nav">
-      <button class="lightbox-btn" id="prevBtn">← Anterior</button>
-      <button class="lightbox-btn" id="nextBtn">Siguiente →</button>
-    </div>
-  </div>
-
-  <!-- Nav -->
   <nav>
     <a href="/" class="nav-logo">Saint Messere</a>
     <a href="/" class="nav-back">← Volver</a>
   </nav>
 
-  <!-- Header -->
-  <div class="header">
-    <p class="header-eyebrow" id="eyebrow">El universo visual</p>
-    <h1 class="header-title" id="title">
-      <em>El</em><br>Teatro
-    </h1>
+  <div class="stage">
+    <div class="carousel" id="carousel">
+      <div class="card" data-index="0">
+        <img src="/images/lucid-origin_Full_body_shot_from_behind_a_tall_figure_in_a_dark_tailored_suit_standing_at_the-0.jpg" alt="I" loading="eager" />
+        <span class="card-num">01</span>
+      </div>
+      <div class="card" data-index="1">
+        <img src="/images/Gemini_Generated_Image_emosanemosanemos.png" alt="II" loading="lazy" />
+        <span class="card-num">02</span>
+      </div>
+      <div class="card" data-index="2">
+        <img src="/images/kling_20260411_作品_Image1rans_2920_0.png" alt="III" loading="lazy" />
+        <span class="card-num">03</span>
+      </div>
+      <div class="card" data-index="3">
+        <img src="/images/Gemini_Generated_Image_kv0wphkv0wphkv0w.png" alt="IV" loading="lazy" />
+        <span class="card-num">04</span>
+      </div>
+      <div class="card" data-index="4">
+        <img src="/images/kling_20260411_作品_Image1rans_2920_1.png" alt="V" loading="lazy" />
+        <span class="card-num">05</span>
+      </div>
+      <div class="card" data-index="5">
+        <img src="/images/Gemini_Generated_Image_t2k9a2t2k9a2t2k9 (1).png" alt="VI" loading="lazy" />
+        <span class="card-num">06</span>
+      </div>
+      <div class="card" data-index="6">
+        <img src="/images/Gemini_Generated_Image_yhvcpuyhvcpuyhvc.png" alt="VII" loading="lazy" />
+        <span class="card-num">07</span>
+      </div>
+      <div class="card" data-index="7">
+        <img src="/images/Gemini_Generated_Image_zcu36mzcu36mzcu3.png" alt="VIII" loading="lazy" />
+        <span class="card-num">08</span>
+      </div>
+    </div>
   </div>
 
-  <!-- Gallery -->
-  <div class="gallery" id="gallery">
-
-    <div class="gallery-item" data-index="0">
-      <img src="/images/lucid-origin_Full_body_shot_from_behind_a_tall_figure_in_a_dark_tailored_suit_standing_at_the-0.jpg" alt="Saint Messere I" loading="lazy" />
-      <div class="gallery-item-overlay">
-        <span class="gallery-item-num">01</span>
-      </div>
-    </div>
-
-    <div class="gallery-item" data-index="1">
-      <img src="/images/Gemini_Generated_Image_emosanemosanemos.png" alt="Saint Messere II" loading="lazy" />
-      <div class="gallery-item-overlay">
-        <span class="gallery-item-num">02</span>
-      </div>
-    </div>
-
-    <div class="gallery-item" data-index="2">
-      <img src="/images/kling_20260411_作品_Image1rans_2920_0.png" alt="Saint Messere III" loading="lazy" />
-      <div class="gallery-item-overlay">
-        <span class="gallery-item-num">03</span>
-      </div>
-    </div>
-
-    <div class="gallery-item" data-index="3">
-      <img src="/images/Gemini_Generated_Image_kv0wphkv0wphkv0w.png" alt="Saint Messere IV" loading="lazy" />
-      <div class="gallery-item-overlay">
-        <span class="gallery-item-num">04</span>
-      </div>
-    </div>
-
-    <div class="gallery-item" data-index="4">
-      <img src="/images/kling_20260411_作品_Image1rans_2920_1.png" alt="Saint Messere V" loading="lazy" />
-      <div class="gallery-item-overlay">
-        <span class="gallery-item-num">05</span>
-      </div>
-    </div>
-
-    <div class="gallery-item" data-index="5">
-      <img src="/images/Gemini_Generated_Image_t2k9a2t2k9a2t2k9 (1).png" alt="Saint Messere VI" loading="lazy" />
-      <div class="gallery-item-overlay">
-        <span class="gallery-item-num">06</span>
-      </div>
-    </div>
-
-    <div class="gallery-item" data-index="6">
-      <img src="/images/Gemini_Generated_Image_yhvcpuyhvcpuyhvc.png" alt="Saint Messere VII" loading="lazy" />
-      <div class="gallery-item-overlay">
-        <span class="gallery-item-num">07</span>
-      </div>
-    </div>
-
-    <div class="gallery-item" data-index="7">
-      <img src="/images/Gemini_Generated_Image_zcu36mzcu36mzcu3.png" alt="Saint Messere VIII" loading="lazy" />
-      <div class="gallery-item-overlay">
-        <span class="gallery-item-num">08</span>
-      </div>
-    </div>
-
+  <div class="hud">
+    <div class="hud-counter" id="counter">01 / 08</div>
+    <div class="hud-dots" id="dots"></div>
+    <div class="hud-hint">Scroll · Arrastrar</div>
   </div>
 
-  <!-- Footer -->
-  <footer>
-    <span class="footer-sig">Saint Messere — El Teatro</span>
-    <a href="https://instagram.com/saintmessere" target="_blank" class="footer-link">Instagram</a>
-  </footer>
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-close" id="lbClose">Cerrar</div>
+    <img id="lbImg" src="" alt="" />
+  </div>
 
   <script>
-    // ── Cursor
-    const cursor = document.getElementById('cursor');
-    const ring   = document.getElementById('cursorRing');
-    let mx = 0, my = 0, rx = 0, ry = 0;
+    const N = 8;
+    const carousel = document.getElementById('carousel');
+    const cards = Array.from(carousel.querySelectorAll('.card'));
+    const counter = document.getElementById('counter');
+    const dotsWrap = document.getElementById('dots');
+    const lightbox = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lbImg');
+    const lbClose = document.getElementById('lbClose');
 
+    const cur = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
     document.addEventListener('mousemove', e => {
       mx = e.clientX; my = e.clientY;
-      cursor.style.left = mx + 'px';
-      cursor.style.top  = my + 'px';
+      cur.style.left = mx + 'px'; cur.style.top = my + 'px';
     });
-
-    (function animRing() {
-      rx += (mx - rx) * 0.1;
-      ry += (my - ry) * 0.1;
-      ring.style.left = rx + 'px';
-      ring.style.top  = ry + 'px';
-      requestAnimationFrame(animRing);
+    (function animR() {
+      rx += (mx - rx) * 0.1; ry += (my - ry) * 0.1;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animR);
     })();
 
-    // ── Hero reveal
-    setTimeout(() => {
-      document.getElementById('eyebrow').classList.add('visible');
-      document.getElementById('title').classList.add('visible');
-    }, 300);
+    const dots = [];
+    for (let i = 0; i < N; i++) {
+      const d = document.createElement('div');
+      d.className = 'hud-dot' + (i === 0 ? ' active' : '');
+      d.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(d);
+      dots.push(d);
+    }
 
-    // ── Gallery reveal on scroll
-    const items = document.querySelectorAll('.gallery-item');
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach((entry, i) => {
-        if (!entry.isIntersecting) return;
-        setTimeout(() => entry.target.classList.add('visible'), i * 80);
-        obs.unobserve(entry.target);
+    const angleStep = (2 * Math.PI) / N;
+    const radius = 600;
+
+    function positionCards(rotY) {
+      cards.forEach((card, i) => {
+        const angle = angleStep * i + rotY;
+        const x = Math.sin(angle) * radius;
+        const z = Math.cos(angle) * radius - radius;
+        const scale = 0.5 + 0.5 * ((Math.cos(angle) + 1) / 2);
+        const opacity = 0.15 + 0.85 * ((Math.cos(angle) + 1) / 2);
+        card.style.transform = `translateX(${x}px) translateZ(${z}px) scale(${scale})`;
+        card.style.opacity = opacity;
+        card.style.zIndex = Math.round(scale * 10);
       });
-    }, { threshold: 0.1 });
-    items.forEach(el => obs.observe(el));
-
-    // ── Lightbox
-    const lightbox   = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightboxImg');
-    const images = Array.from(document.querySelectorAll('.gallery-item img'));
-    let current = 0;
-
-    function openLightbox(index) {
-      current = index;
-      lightboxImg.src = images[index].src;
-      lightbox.classList.add('active');
-      document.body.style.overflow = 'hidden';
     }
 
-    function closeLightbox() {
-      lightbox.classList.remove('active');
-      document.body.style.overflow = '';
+    let currentAngle = 0;
+    let targetAngle = 0;
+
+    function getActiveIndex() {
+      let a = ((-targetAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      let idx = Math.round(a / angleStep) % N;
+      return ((idx % N) + N) % N;
     }
 
-    items.forEach((item, i) => {
-      item.style.cursor = 'pointer';
-      item.addEventListener('click', () => openLightbox(i));
+    function updateHUD() {
+      const idx = getActiveIndex();
+      counter.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+
+    function goTo(index) {
+      const current = getActiveIndex();
+      let diff = index - current;
+      if (diff > N / 2) diff -= N;
+      if (diff < -N / 2) diff += N;
+      targetAngle -= diff * angleStep;
+      updateHUD();
+    }
+
+    (function loop() {
+      currentAngle += (targetAngle - currentAngle) * 0.08;
+      positionCards(currentAngle);
+      requestAnimationFrame(loop);
+    })();
+
+    window.addEventListener('wheel', e => {
+      e.preventDefault();
+      targetAngle -= e.deltaY * 0.003;
+      updateHUD();
+    }, { passive: false });
+
+    let dragging = false;
+    let dragStartX = 0;
+    let dragStartAngle = 0;
+    let didDrag = false;
+
+    document.addEventListener('mousedown', e => {
+      if (lightbox.classList.contains('active')) return;
+      dragging = true;
+      didDrag = false;
+      dragStartX = e.clientX;
+      dragStartAngle = targetAngle;
     });
 
-    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
-
-    document.getElementById('prevBtn').addEventListener('click', () => {
-      current = (current - 1 + images.length) % images.length;
-      lightboxImg.src = images[current].src;
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - dragStartX;
+      if (Math.abs(dx) > 4) didDrag = true;
+      targetAngle = dragStartAngle + dx * 0.005;
+      updateHUD();
     });
 
-    document.getElementById('nextBtn').addEventListener('click', () => {
-      current = (current + 1) % images.length;
-      lightboxImg.src = images[current].src;
+    document.addEventListener('mouseup', () => { dragging = false; });
+
+    let touchStartX = 0;
+    let touchStartAngle = 0;
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartAngle = targetAngle;
+    }, { passive: true });
+    document.addEventListener('touchmove', e => {
+      const dx = e.touches[0].clientX - touchStartX;
+      targetAngle = touchStartAngle + dx * 0.005;
+      updateHUD();
+    }, { passive: true });
+
+    cards.forEach((card, i) => {
+      card.addEventListener('click', () => {
+        if (didDrag) return;
+        const idx = getActiveIndex();
+        if (i !== idx) { goTo(i); return; }
+        lbImg.src = card.querySelector('img').src;
+        lightbox.classList.add('active');
+      });
     });
 
+    lbClose.addEventListener('click', () => lightbox.classList.remove('active'));
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('active'); });
     document.addEventListener('keydown', e => {
-      if (!lightbox.classList.contains('active')) return;
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowLeft') document.getElementById('prevBtn').click();
-      if (e.key === 'ArrowRight') document.getElementById('nextBtn').click();
+      if (e.key === 'Escape') lightbox.classList.remove('active');
+      if (e.key === 'ArrowRight') { targetAngle -= angleStep; updateHUD(); }
+      if (e.key === 'ArrowLeft')  { targetAngle += angleStep; updateHUD(); }
     });
 
-    lightbox.addEventListener('click', e => {
-      if (e.target === lightbox) closeLightbox();
-    });
+    updateHUD();
   </script>
 
 </body>
