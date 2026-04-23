@@ -29,7 +29,6 @@
       cursor: none;
     }
 
-    /* ── Cursor ── */
     .cursor {
       width: 8px;
       height: 8px;
@@ -57,7 +56,6 @@
       border-color: rgba(232,228,220,0.6);
     }
 
-    /* ── Noise ── */
     body::before {
       content: '';
       position: fixed;
@@ -68,7 +66,6 @@
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
-    /* ── Sections ── */
     section {
       min-height: 100vh;
       display: flex;
@@ -79,7 +76,6 @@
       overflow: hidden;
     }
 
-    /* ── Parallax ghost chars ── */
     .ghost {
       position: absolute;
       font-family: var(--serif);
@@ -91,7 +87,6 @@
       line-height: 1;
     }
 
-    /* ── Reveal system ── */
     [data-reveal] {
       opacity: 0;
       transition: opacity 0.9s ease, transform 0.9s ease;
@@ -321,6 +316,20 @@
       .acts { flex-direction: column; gap: 28px; }
       .act-sep { transform: rotate(90deg); }
       .cierre-links { gap: 28px; }
+
+      /* Legibilidad mobile */
+      .hero-eyebrow { font-size: 13px; color: rgba(232,228,220,0.55); }
+      .hero-sub { font-size: 13px; color: rgba(232,228,220,0.55); }
+      .m-dim { color: rgba(232,228,220,0.45); }
+      .m-italic { font-size: 16px; color: rgba(232,228,220,0.55); }
+      .pillar p { font-size: 13px; color: rgba(232,228,220,0.55); line-height: 2; }
+      .pillar-num { color: rgba(232,228,220,0.35); }
+      .pillars-label { font-size: 12px; color: rgba(232,228,220,0.4); }
+      .act-label { font-size: 12px; color: rgba(232,228,220,0.5); }
+      .cierre-sig { font-size: 12px; color: rgba(232,228,220,0.4); }
+      .cierre-link { font-size: 12px; color: rgba(232,228,220,0.6); }
+      .cierre-quote { font-size: clamp(18px, 4.5vw, 26px); color: rgba(232,228,220,0.65); }
+      .scroll-hint span { color: rgba(232,228,220,0.4); }
     }
   </style>
 </head>
@@ -418,7 +427,6 @@
   </section>
 
   <script>
-    // ── Cursor
     const cursor = document.getElementById('cursor');
     const ring   = document.getElementById('cursorRing');
     let mx = 0, my = 0, rx = 0, ry = 0;
@@ -437,7 +445,6 @@
       requestAnimationFrame(animRing);
     })();
 
-    // ── Parallax ghost chars
     const ghosts = document.querySelectorAll('.ghost[data-speed]');
     window.addEventListener('scroll', () => {
       const sy = window.scrollY;
@@ -446,7 +453,6 @@
       });
     }, { passive: true });
 
-    // ── Reveal on scroll
     const reveals = document.querySelectorAll('[data-reveal]');
     const obs = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -459,7 +465,6 @@
 
     reveals.forEach(el => obs.observe(el));
 
-    // ── Hero auto-reveal on load
     document.querySelectorAll('.hero [data-reveal]').forEach((el, i) => {
       setTimeout(() => el.classList.add('visible'), 300 + i * 180);
     });
