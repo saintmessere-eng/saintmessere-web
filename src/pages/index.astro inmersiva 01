@@ -1,0 +1,593 @@
+---
+// Saint Messere — index.astro — inmersivo 3D
+---
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Saint Messere</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink: #e8e4dc;
+      --ink-dim: rgba(232,228,220,0.3);
+      --ink-ghost: rgba(232,228,220,0.05);
+      --bg: #0a0a0a;
+      --bg-alt: #0d0d0d;
+      --mono: 'Courier New', monospace;
+      --serif: 'Georgia', serif;
+      --gold: rgba(200,185,122,0.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--serif);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── Cursor ── */
+    .cursor {
+      width: 6px; height: 6px;
+      background: var(--ink);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: difference;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(232,228,220,0.3);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s, border-color 0.3s, opacity 0.3s;
+    }
+    body:has(a:hover) .cursor-ring {
+      width: 56px; height: 56px;
+      border-color: rgba(232,228,220,0.5);
+    }
+
+    /* ── Noise ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ── Canvas de partículas ── */
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── World — responde al mouse ── */
+    #world {
+      position: relative;
+      z-index: 1;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease;
+      will-change: transform;
+    }
+
+    /* ── Sections ── */
+    section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 60px;
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    /* ── Capas de profundidad ── */
+    .depth-far {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      will-change: transform;
+      transform: translateZ(-120px) scale(1.15);
+    }
+    .depth-mid {
+      position: absolute;
+      pointer-events: none;
+      user-select: none;
+      will-change: transform;
+      transform: translateZ(-60px) scale(1.07);
+    }
+    .depth-near {
+      position: relative;
+      will-change: transform;
+      transform: translateZ(0px);
+    }
+
+    /* ── Ghost chars ── */
+    .ghost {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--ink-ghost);
+      line-height: 1;
+    }
+
+    /* ── Líneas de horizonte ── */
+    .horizon {
+      position: absolute;
+      left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(232,228,220,0.04), transparent);
+      pointer-events: none;
+    }
+
+    /* ── Reveal ── */
+    [data-reveal] {
+      opacity: 0;
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    [data-reveal="up"]    { transform: translateY(50px); }
+    [data-reveal="left"]  { transform: translateX(-70px); }
+    [data-reveal="scale"] { transform: scale(0.9); }
+    [data-reveal="fade"]  { transform: none; }
+    [data-reveal="depth"] { transform: translateZ(-40px) scale(0.96); opacity: 0; }
+    [data-reveal].visible { opacity: 1; transform: none; }
+
+    /* ── HERO ── */
+    .hero {
+      flex-direction: column;
+      text-align: center;
+      background: var(--bg);
+      perspective: 800px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      color: var(--ink-dim);
+      text-transform: uppercase;
+      margin-bottom: 48px;
+    }
+    .hero-name {
+      font-size: clamp(64px, 13vw, 148px);
+      font-weight: 400;
+      line-height: 0.88;
+      letter-spacing: -0.02em;
+      transform-style: preserve-3d;
+    }
+    .hero-name .light {
+      color: rgba(232,228,220,0.12);
+      font-style: italic;
+      display: block;
+      transform: translateZ(-20px);
+    }
+    .hero-name .bold {
+      display: block;
+      transform: translateZ(20px);
+    }
+    .hero-sub {
+      margin-top: 48px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      color: var(--ink-dim);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      animation: fadeIn 1s ease 1.4s forwards;
+    }
+    .scroll-hint span {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      color: rgba(232,228,220,0.18);
+      text-transform: uppercase;
+    }
+    .scroll-hint::after {
+      content: '';
+      width: 1px;
+      height: 56px;
+      background: linear-gradient(to bottom, rgba(232,228,220,0.2), transparent);
+      animation: scrollPulse 2.4s ease infinite;
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+    @keyframes scrollPulse {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      49%  { transform: scaleY(1); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+
+    /* ── MANIFESTO ── */
+    .manifesto { background: var(--bg-alt); flex-direction: column; }
+    .manifesto-wrap { max-width: 640px; width: 100%; }
+    .m-line {
+      font-size: clamp(26px, 4vw, 46px);
+      font-weight: 400;
+      line-height: 1.15;
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--ink-ghost);
+    }
+    .m-line:last-child { border-bottom: none; }
+    .m-em   { color: var(--ink); }
+    .m-dim  { color: rgba(232,228,220,0.2); }
+    .m-mid  { color: rgba(232,228,220,0.55); }
+    .m-italic { font-style: italic; font-size: clamp(14px, 2vw, 20px); color: rgba(232,228,220,0.3); }
+
+    /* ── PILLARS ── */
+    .pillars { background: var(--bg); flex-direction: column; gap: 72px; }
+    .pillars-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.45em;
+      color: rgba(232,228,220,0.2);
+      text-transform: uppercase;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(232,228,220,0.06);
+      width: 100%;
+      max-width: 900px;
+    }
+    .pillar {
+      background: var(--bg);
+      padding: 48px 32px;
+      transition: background 0.4s ease, transform 0.4s ease;
+      transform-style: preserve-3d;
+    }
+    .pillar:hover {
+      background: #0f0f0f;
+      transform: translateZ(12px);
+    }
+    .pillar-num {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: rgba(232,228,220,0.18);
+      margin-bottom: 24px;
+    }
+    .pillar h3 { font-size: 22px; font-weight: 400; margin-bottom: 18px; line-height: 1.2; }
+    .pillar p {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(232,228,220,0.32);
+      line-height: 1.9;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── TEATRO ── */
+    .teatro { background: var(--bg-alt); flex-direction: column; text-align: center; gap: 64px; }
+    .teatro h2 {
+      font-size: clamp(38px, 7vw, 84px);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+    .teatro h2 em { font-style: italic; color: rgba(232,228,220,0.22); }
+    .acts { display: flex; align-items: center; gap: 48px; }
+    .act { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .act-symbol { font-size: 28px; opacity: 0.45; line-height: 1; transition: opacity 0.4s, transform 0.4s; }
+    .act:hover .act-symbol { opacity: 0.9; transform: translateZ(20px) scale(1.1); }
+    .act-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      color: rgba(232,228,220,0.28);
+      text-transform: uppercase;
+    }
+    .act-sep { font-size: 16px; color: rgba(232,228,220,0.08); padding-bottom: 20px; }
+
+    /* ── CIERRE ── */
+    .cierre { background: var(--bg); flex-direction: column; text-align: center; gap: 36px; }
+    .cierre-quote {
+      font-size: clamp(17px, 2.8vw, 30px);
+      font-style: italic;
+      color: rgba(232,228,220,0.45);
+      max-width: 560px;
+      line-height: 1.6;
+    }
+    .cierre-quote strong { color: var(--ink); font-weight: 400; }
+    .cierre-sig {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: rgba(232,228,220,0.18);
+    }
+    .cierre-links {
+      display: flex;
+      gap: 48px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+    .cierre-link {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(232,228,220,0.35);
+      text-decoration: none;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(232,228,220,0.1);
+      transition: color 0.3s, border-color 0.3s, transform 0.3s;
+      display: inline-block;
+    }
+    .cierre-link:hover {
+      color: var(--ink);
+      border-color: rgba(232,228,220,0.45);
+      transform: translateY(-2px);
+    }
+
+    /* ── Vignette ── */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 720px) {
+      section { padding: 60px 28px; }
+      .pillars-grid { grid-template-columns: 1fr; }
+      .acts { flex-direction: column; gap: 28px; }
+      .act-sep { transform: rotate(90deg); }
+      .cierre-links { gap: 24px; flex-wrap: wrap; justify-content: center; }
+
+      .hero-eyebrow { font-size: 13px; color: rgba(232,228,220,0.55); }
+      .hero-sub { font-size: 13px; color: rgba(232,228,220,0.55); }
+      .m-dim { color: rgba(232,228,220,0.45); }
+      .m-italic { font-size: 16px; color: rgba(232,228,220,0.55); }
+      .pillar p { font-size: 13px; color: rgba(232,228,220,0.55); line-height: 2; }
+      .pillar-num { color: rgba(232,228,220,0.35); }
+      .pillars-label { font-size: 12px; color: rgba(232,228,220,0.4); }
+      .act-label { font-size: 12px; color: rgba(232,228,220,0.5); }
+      .cierre-sig { font-size: 12px; color: rgba(232,228,220,0.4); }
+      .cierre-link { font-size: 12px; color: rgba(232,228,220,0.6); }
+      .cierre-quote { font-size: clamp(18px, 4.5vw, 26px); color: rgba(232,228,220,0.65); }
+      .scroll-hint span { color: rgba(232,228,220,0.4); }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particles"></canvas>
+  <div class="vignette"></div>
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <div id="world">
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+
+      <div class="depth-far ghost" style="font-size:clamp(200px,36vw,420px);top:-15%;right:-8%;opacity:0.03;">S</div>
+      <div class="depth-mid ghost" style="font-size:clamp(140px,24vw,280px);bottom:-18%;left:-8%;opacity:0.04;">M</div>
+      <div class="horizon" style="top:30%;"></div>
+      <div class="horizon" style="top:70%;"></div>
+
+      <div class="depth-near" style="display:flex;flex-direction:column;align-items:center;">
+        <p class="hero-eyebrow" data-reveal="up">Un universo en construcción lenta</p>
+        <h1 class="hero-name" data-reveal="depth">
+          <span class="light">Saint</span>
+          <span class="bold">Messere</span>
+        </h1>
+        <p class="hero-sub" data-reveal="up">Teatro · Personaje · Círculo</p>
+      </div>
+
+      <div class="scroll-hint"><span>Desplaza</span></div>
+    </section>
+
+    <!-- ── MANIFESTO ── -->
+    <section class="manifesto">
+      <div class="depth-far ghost" style="font-size:clamp(120px,20vw,240px);top:10%;right:0%;opacity:0.03;">∞</div>
+      <div class="horizon" style="top:50%;"></div>
+      <div class="manifesto-wrap depth-near">
+        <p class="m-line m-em"     data-reveal="left" data-delay="0">No persuade.</p>
+        <p class="m-line m-dim"    data-reveal="left" data-delay="80">No explica.</p>
+        <p class="m-line m-em"     data-reveal="left" data-delay="160">No vende.</p>
+        <p class="m-line m-mid"    data-reveal="left" data-delay="240">Insinúa. Provoca. Atrae.</p>
+        <p class="m-line m-italic" data-reveal="left" data-delay="340">"El universo se construye lento.<br>Primero la familia, luego el mito."</p>
+      </div>
+    </section>
+
+    <!-- ── PILLARS ── -->
+    <section class="pillars">
+      <div class="depth-far ghost" style="font-size:clamp(100px,16vw,200px);bottom:0;right:5%;opacity:0.025;">·</div>
+      <p class="pillars-label depth-near" data-reveal="fade">El sistema</p>
+      <div class="pillars-grid depth-near">
+        <div class="pillar" data-reveal="up" data-delay="0">
+          <div class="pillar-num">01</div>
+          <h3>El personaje</h3>
+          <p>Satírico pero preciso.<br>Elegante pero callejero.<br>Un narrador que juega.</p>
+        </div>
+        <div class="pillar" data-reveal="up" data-delay="120">
+          <div class="pillar-num">02</div>
+          <h3>El teatro</h3>
+          <p>Cada acto es una escena.<br>Cada visita es participar.<br>No se observa — se habita.</p>
+        </div>
+        <div class="pillar" data-reveal="up" data-delay="240">
+          <div class="pillar-num">03</div>
+          <h3>El círculo</h3>
+          <p>No busca audiencia.<br>Construye familia.<br>Por afinidad, no algoritmo.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TEATRO ── -->
+    <section class="teatro">
+      <div class="depth-far ghost" style="font-size:clamp(140px,22vw,260px);top:5%;left:-3%;opacity:0.03;">T</div>
+      <div class="horizon" style="top:40%;"></div>
+      <div class="horizon" style="top:60%;"></div>
+      <h2 class="depth-near" data-reveal="depth">
+        El <em>teatro</em><br>de Saint Messere
+      </h2>
+      <div class="acts depth-near" data-reveal="up" data-delay="200">
+        <div class="act">
+          <div class="act-symbol">◯</div>
+          <div class="act-label">Interacción</div>
+        </div>
+        <div class="act-sep">→</div>
+        <div class="act">
+          <div class="act-symbol">◈</div>
+          <div class="act-label">Interpretación</div>
+        </div>
+        <div class="act-sep">→</div>
+        <div class="act">
+          <div class="act-symbol">◉</div>
+          <div class="act-label">Participación</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CIERRE ── -->
+    <section class="cierre">
+      <div class="depth-far ghost" style="font-size:clamp(80px,14vw,160px);bottom:10%;right:5%;opacity:0.025;">SM</div>
+      <p class="cierre-quote depth-near" data-reveal="depth">
+        Un universo narrativo íntimo donde el lenguaje,<br>la estética y el silencio generan una experiencia<br>que mezcla <strong>arte, seducción y pensamiento.</strong>
+      </p>
+      <p class="cierre-sig depth-near" data-reveal="fade" data-delay="200">— Saint Messere</p>
+      <nav class="cierre-links depth-near" data-reveal="up" data-delay="350">
+        <a href="https://on.soundcloud.com/dXyF4x4jJx3oxKWEZS" target="_blank" class="cierre-link">Audition</a>
+        <a href="/gallery" class="cierre-link">Gallery</a>
+        <a href="/blog" class="cierre-link">Blog</a>
+        <a href="https://instagram.com/saintmessere" target="_blank" class="cierre-link">Instagram</a>
+      </nav>
+    </section>
+
+  </div><!-- /world -->
+
+  <script>
+    // ── Cursor
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    });
+    (function animRing() {
+      rx += (mx - rx) * 0.1; ry += (my - ry) * 0.1;
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    })();
+
+    // ── Mouse parallax 3D en el world
+    const world = document.getElementById('world');
+    const W = window.innerWidth, H = window.innerHeight;
+    let tx = 0, ty = 0, cx = 0, cy = 0;
+
+    document.addEventListener('mousemove', e => {
+      tx = ((e.clientX / W) - 0.5) * 6;
+      ty = ((e.clientY / H) - 0.5) * -4;
+    });
+
+    (function tiltLoop() {
+      cx += (tx - cx) * 0.06;
+      cy += (ty - cy) * 0.06;
+      world.style.transform = `perspective(1200px) rotateY(${cx}deg) rotateX(${cy}deg)`;
+      requestAnimationFrame(tiltLoop);
+    })();
+
+    // ── Scroll parallax en capas de profundidad
+    const farLayers  = document.querySelectorAll('.depth-far');
+    const midLayers  = document.querySelectorAll('.depth-mid');
+
+    window.addEventListener('scroll', () => {
+      const sy = window.scrollY;
+      farLayers.forEach(el => {
+        el.style.transform = `translateZ(-120px) scale(1.15) translateY(${sy * 0.18}px)`;
+      });
+      midLayers.forEach(el => {
+        el.style.transform = `translateZ(-60px) scale(1.07) translateY(${sy * 0.08}px)`;
+      });
+    }, { passive: true });
+
+    // ── Partículas flotantes
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let W2 = canvas.width = window.innerWidth;
+    let H2 = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      W2 = canvas.width = window.innerWidth;
+      H2 = canvas.height = window.innerHeight;
+    });
+
+    const PARTS = 55;
+    const parts = Array.from({ length: PARTS }, () => ({
+      x: Math.random() * W2,
+      y: Math.random() * H2,
+      r: Math.random() * 1.2 + 0.2,
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: (Math.random() - 0.5) * 0.12,
+      o: Math.random() * 0.18 + 0.04,
+      depth: Math.random(),
+    }));
+
+    let scrollY = 0;
+    window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
+
+    (function drawParticles() {
+      ctx.clearRect(0, 0, W2, H2);
+      parts.forEach(p => {
+        p.x += p.vx + (mx / W2 - 0.5) * 0.3 * p.depth;
+        p.y += p.vy - scrollY * 0.00008 * p.depth;
+        if (p.x < 0) p.x = W2;
+        if (p.x > W2) p.x = 0;
+        if (p.y < 0) p.y = H2;
+        if (p.y > H2) p.y = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(232,228,220,${p.o})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawParticles);
+    })();
+
+    // ── Reveal on scroll
+    const reveals = document.querySelectorAll('[data-reveal]');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const delay = parseInt(entry.target.dataset.delay || 0);
+        setTimeout(() => entry.target.classList.add('visible'), delay);
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => obs.observe(el));
+
+    // Hero reveal on load
+    document.querySelectorAll('.hero [data-reveal]').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), 400 + i * 200);
+    });
+  </script>
+
+</body>
+</html>
