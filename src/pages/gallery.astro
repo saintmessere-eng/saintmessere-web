@@ -85,7 +85,6 @@
     }
     .nav-back:hover { color: var(--ink); }
 
-    /* ── Stage ── */
     .stage {
       position: fixed;
       inset: 0;
@@ -108,32 +107,23 @@
       margin-top: -170px;
       transform-style: preserve-3d;
       cursor: pointer;
-      transition: outline 0.3s;
     }
 
     .card img {
       width: 100%; height: 100%;
       object-fit: cover;
       display: block;
+      border-radius: 12px;
       border: 1px solid rgba(232,228,220,0.07);
-border-radius: 12px;
-      transition: filter 0.5s ease;
+      transition: filter 0.4s ease, transform 0.4s ease;
     }
 
     .card.front img { filter: grayscale(0%) contrast(1.08); }
-.card:not(.front) img { filter: grayscale(30%) contrast(0.95) brightness(0.7); }
-.card:hover img { 
-  filter: grayscale(0%) contrast(1.18) brightness(1.12) !important;
-  transform: scale(1.03);
-}
-.card img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-  border-radius: 12px;
-  border: 1px solid rgba(232,228,220,0.07);
-  transition: filter 0.4s ease, transform 0.4s ease;
-} transition: filter 0.4s ease, transform 0.4s ease; }
+    .card:not(.front) img { filter: grayscale(30%) contrast(0.95) brightness(0.7); }
+    .card:hover img {
+      filter: grayscale(0%) contrast(1.18) brightness(1.12) !important;
+      transform: scale(1.03);
+    }
 
     .card-num {
       position: absolute;
@@ -145,7 +135,6 @@ border-radius: 12px;
       color: rgba(232,228,220,0.18);
     }
 
-    /* ── Orbital rings SVG background ── */
     .rings {
       position: fixed;
       inset: 0;
@@ -154,7 +143,6 @@ border-radius: 12px;
       opacity: 0.04;
     }
 
-    /* ── HUD ── */
     .hud {
       position: fixed;
       bottom: 36px;
@@ -197,7 +185,6 @@ border-radius: 12px;
       text-transform: uppercase;
     }
 
-    /* ── Lightbox ── */
     .lightbox {
       position: fixed;
       inset: 0;
@@ -211,7 +198,7 @@ border-radius: 12px;
       transition: opacity 0.4s ease;
     }
     .lightbox.active { opacity: 1; pointer-events: all; }
-    .lightbox img { max-width: 85vw; max-height: 85vh; object-fit: contain; }
+    .lightbox img { max-width: 85vw; max-height: 85vh; object-fit: contain; border-radius: 8px; }
     .lightbox-close {
       position: absolute;
       top: 32px; right: 48px;
@@ -236,7 +223,6 @@ border-radius: 12px;
   <div class="cursor" id="cursor"></div>
   <div class="cursor-ring" id="cursorRing"></div>
 
-  <!-- Anillos de fondo -->
   <svg class="rings" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
     <ellipse cx="720" cy="450" rx="580" ry="180" fill="none" stroke="#e8e4dc" stroke-width="1" transform="rotate(-12 720 450)"/>
     <ellipse cx="720" cy="450" rx="420" ry="130" fill="none" stroke="#e8e4dc" stroke-width="0.8" transform="rotate(28 720 450)"/>
@@ -308,7 +294,6 @@ border-radius: 12px;
     const lbImg = document.getElementById('lbImg');
     const lbClose = document.getElementById('lbClose');
 
-    // Cursor
     const cur = document.getElementById('cursor');
     const ring = document.getElementById('cursorRing');
     let mx = 0, my = 0, rx = 0, ry = 0;
@@ -322,7 +307,6 @@ border-radius: 12px;
       requestAnimationFrame(animR);
     })();
 
-    // Dots
     const dots = [];
     for (let i = 0; i < N; i++) {
       const d = document.createElement('div');
@@ -332,8 +316,6 @@ border-radius: 12px;
       dots.push(d);
     }
 
-    // Cada foto tiene su propio anillo — radio, inclinación y fase únicos
-    // El "caos" viene de las inclinaciones distintas y radios irregulares
     const orbits = [
       { radius: 480, tiltX: 15,  tiltY: -8,  tiltZ: 12  },
       { radius: 380, tiltX: -40, tiltY: 20,  tiltZ: -5  },
@@ -357,37 +339,29 @@ border-radius: 12px;
       cards.forEach((card, i) => {
         const orbit = orbits[i];
         const a = baseAngles[i] + angle;
-
-        // Posición en el anillo propio — inclinado en 3D
         const cosA = Math.cos(a);
         const sinA = Math.sin(a);
 
-        // Punto en anillo plano
         let x = sinA * orbit.radius;
         let y = 0;
         let z = cosA * orbit.radius;
 
-        // Aplicar inclinaciones del anillo (rotaciones 3D simples)
         const txRad = (orbit.tiltX * Math.PI) / 180;
         const tyRad = (orbit.tiltY * Math.PI) / 180;
         const tzRad = (orbit.tiltZ * Math.PI) / 180;
 
-        // RotX
         let y2 = y * Math.cos(txRad) - z * Math.sin(txRad);
         let z2 = y * Math.sin(txRad) + z * Math.cos(txRad);
         y = y2; z = z2;
 
-        // RotY
         let x3 = x * Math.cos(tyRad) + z * Math.sin(tyRad);
         let z3 = -x * Math.sin(tyRad) + z * Math.cos(tyRad);
         x = x3; z = z3;
 
-        // RotZ
         let x4 = x * Math.cos(tzRad) - y * Math.sin(tzRad);
         let y4 = x * Math.sin(tzRad) + y * Math.cos(tzRad);
         x = x4; y = y4;
 
-        // Escala y opacidad por profundidad
         const zNorm = (z + orbit.radius) / (orbit.radius * 2);
         const scale = 0.38 + 0.62 * zNorm;
         const opacity = 0.1 + 0.9 * zNorm;
@@ -399,7 +373,6 @@ border-radius: 12px;
         if (z > frontZ) { frontZ = z; frontIdx = i; }
       });
 
-      // Marcar la carta más al frente
       cards.forEach((c, i) => c.classList.toggle('front', i === frontIdx));
       activeIdx = frontIdx;
       counter.textContent = String(frontIdx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
@@ -412,20 +385,17 @@ border-radius: 12px;
       targetAngle -= diff * step;
     }
 
-    // Loop
     (function loop() {
       masterAngle += (targetAngle - masterAngle) * 0.07;
       positionCards(masterAngle);
       requestAnimationFrame(loop);
     })();
 
-    // Scroll
     window.addEventListener('wheel', e => {
       e.preventDefault();
       targetAngle -= e.deltaY * 0.004;
     }, { passive: false });
 
-    // Drag
     let dragging = false, dragX = 0, dragAngle = 0, didDrag = false;
     document.addEventListener('mousedown', e => {
       if (lightbox.classList.contains('active')) return;
@@ -440,14 +410,12 @@ border-radius: 12px;
     });
     document.addEventListener('mouseup', () => { dragging = false; });
 
-    // Touch
     let tX = 0, tAngle = 0;
     document.addEventListener('touchstart', e => { tX = e.touches[0].clientX; tAngle = targetAngle; }, { passive: true });
     document.addEventListener('touchmove', e => {
       targetAngle = tAngle + (e.touches[0].clientX - tX) * 0.006;
     }, { passive: true });
 
-    // Click → lightbox o traer al frente
     cards.forEach((card, i) => {
       card.addEventListener('click', () => {
         if (didDrag) return;
