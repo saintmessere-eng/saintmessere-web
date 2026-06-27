@@ -1,5 +1,5 @@
 ---
-// Saint Messere — index.astro — secuenciador hardware (ritual de entrada) + sitio inmersivo
+// Saint Messere — index.astro — secuenciador con carácter de plugin + sitio inmersivo
 ---
 <html lang="es">
 <head>
@@ -171,7 +171,7 @@
     }
 
     /* ═══════════════════════════════════════════
-       RECEPTION — secuenciador hardware (fuera de #world)
+       RECEPTION — secuenciador con carácter de plugin (fuera de #world)
        ═══════════════════════════════════════════ */
     .reception {
       flex-direction: column;
@@ -186,18 +186,18 @@
       text-transform: uppercase;
     }
 
-    /* ── Panel de metal ── */
+    /* ── Panel — chasis del plugin ── */
     .panel {
       position: relative;
       width: 100%;
-      max-width: 860px;
-      background: linear-gradient(160deg, #1b1b1b, #0b0b0b 65%);
+      max-width: 880px;
+      background: linear-gradient(160deg, #1c1c1c, #0a0a0a 65%);
       border-radius: 16px;
-      padding: 38px 36px 32px;
-      border: 1px solid rgba(0,0,0,0.7);
+      padding: 26px 30px 30px;
+      border: 1px solid rgba(0,0,0,0.75);
       box-shadow:
-        0 24px 60px rgba(0,0,0,0.65),
-        inset 0 1px 0 rgba(255,255,255,0.06),
+        0 26px 64px rgba(0,0,0,0.65),
+        inset 0 1px 0 rgba(255,255,255,0.07),
         inset 0 -1px 0 rgba(0,0,0,0.6);
     }
     .panel::before {
@@ -208,20 +208,19 @@
       pointer-events: none;
       background-image: repeating-linear-gradient(98deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
     }
-    .panel-plate {
-      text-align: center;
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.4em;
-      color: rgba(232,228,220,0.22);
-      text-transform: uppercase;
-      margin-bottom: 30px;
+    .panel::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 38%);
     }
     .screw {
       position: absolute;
       width: 9px; height: 9px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #5a5a5a, #0d0d0d 72%);
+      background: radial-gradient(circle at 35% 30%, #5c5c5c, #0d0d0d 72%);
       box-shadow: inset 0 0 2px rgba(0,0,0,0.85), 0 1px 1px rgba(255,255,255,0.06);
       z-index: 2;
     }
@@ -238,40 +237,102 @@
     .screw.bl { bottom: 12px; left: 12px; }
     .screw.br { bottom: 12px; right: 12px; }
 
-    /* ── Grilla de pasos ── */
+    /* ── Barra de marca (estilo plugin) ── */
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      position: relative;
+      z-index: 1;
+    }
+    .brand-mark {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,185,122,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--gold-solid);
+      letter-spacing: 0.03em;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 8px rgba(200,185,122,0.18);
+    }
+    .brand-text { flex: 1; min-width: 0; }
+    .brand-title {
+      font-family: var(--serif);
+      font-size: 16px;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(232,228,220,0.32);
+      margin-top: 3px;
+    }
+    .lcd {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: #d8c98a;
+      text-shadow: 0 0 6px rgba(216,201,138,0.55);
+      background: #060606;
+      border: 1px solid rgba(0,0,0,0.85);
+      border-radius: 4px;
+      padding: 8px 14px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.85);
+      min-width: 124px;
+      text-align: center;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    /* ── Pantalla del secuenciador ── */
+    .seq-screen {
+      background: #050505;
+      border-radius: 10px;
+      padding: 18px 16px;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.04);
+      position: relative;
+      z-index: 1;
+    }
     .sequencer {
       display: flex;
       flex-direction: column;
-      gap: 13px;
-      position: relative;
-      z-index: 1;
+      gap: 12px;
     }
     .track-row {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 11px;
     }
     .track-label {
       font-family: var(--mono);
       font-size: 10px;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.45);
-      width: 38px;
+      color: rgba(232,228,220,0.5);
+      width: 36px;
       flex-shrink: 0;
-      text-shadow: 0 1px 0 rgba(0,0,0,0.6);
     }
     .track-led {
       width: 6px; height: 6px;
       border-radius: 50%;
-      background: rgba(232,228,220,0.08);
-      box-shadow: inset 0 0 2px rgba(0,0,0,0.6);
+      background: rgba(232,228,220,0.1);
+      box-shadow: inset 0 0 2px rgba(0,0,0,0.7);
       flex-shrink: 0;
       transition: background 0.05s, box-shadow 0.05s;
     }
     .track-led.lit {
-      background: var(--gold-solid);
-      box-shadow: 0 0 7px 2px rgba(200,185,122,0.85);
+      background: #fff0c4;
+      box-shadow: 0 0 8px 3px rgba(255,221,140,0.9);
     }
     .steps {
       display: grid;
@@ -283,96 +344,99 @@
       aspect-ratio: 1;
       border-radius: 4px;
       cursor: pointer;
-      background: linear-gradient(180deg, #1d1d1d, #0a0a0a);
-      border: 1px solid rgba(0,0,0,0.65);
+      background: linear-gradient(180deg, #2b2b2b, #161616);
+      border: 1px solid rgba(255,255,255,0.08);
       box-shadow:
-        inset 0 2px 3px rgba(0,0,0,0.85),
+        inset 0 2px 2px rgba(0,0,0,0.6),
         inset 0 -1px 1px rgba(255,255,255,0.04);
-      position: relative;
-      transition: box-shadow 0.15s ease;
+      transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
     }
-    .step.beat {
+    .step.beat { border-left: 2px solid rgba(200,185,122,0.3); }
+    .step.active {
+      background: linear-gradient(180deg, #f0d28c, #b8924f);
+      border-color: rgba(255,230,160,0.7);
       box-shadow:
-        inset 0 0 0 1px rgba(200,185,122,0.16),
-        inset 0 2px 3px rgba(0,0,0,0.85);
-    }
-    .step::after {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 32%; height: 32%;
-      border-radius: 50%;
-      background: rgba(232,228,220,0.05);
-      transform: translate(-50%, -50%);
-      transition: background 0.15s ease, box-shadow 0.15s ease;
-    }
-    .step.active::after {
-      background: var(--gold-solid);
-      box-shadow: 0 0 7px 2px rgba(200,185,122,0.8), 0 0 16px 4px rgba(200,185,122,0.32);
+        0 0 14px 3px rgba(216,190,120,0.65),
+        inset 0 1px 1px rgba(255,255,255,0.5),
+        inset 0 -2px 3px rgba(110,82,28,0.55);
     }
     .step.playhead {
-      box-shadow:
-        inset 0 0 0 1px rgba(232,228,220,0.55),
-        inset 0 2px 3px rgba(0,0,0,0.85),
-        0 0 9px rgba(232,228,220,0.22);
+      outline: 2px solid rgba(255,255,255,0.85);
+      outline-offset: 1px;
+      transform: scale(1.05);
     }
 
-    /* ── Tira de controles ── */
-    .controls-strip {
+    /* ── Franja de controles ── */
+    .controls-screen {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 28px;
+      gap: 24px;
       flex-wrap: wrap;
-      margin-top: 32px;
+      margin-top: 20px;
+      background: rgba(255,255,255,0.015);
+      border-radius: 10px;
+      padding: 22px 24px;
+      box-shadow: inset 0 1px 5px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.03);
       position: relative;
       z-index: 1;
     }
     .knobs-row {
       display: flex;
-      gap: 34px;
+      gap: 32px;
       flex-wrap: wrap;
     }
 
-    /* ── Perilla real (rotary knob) ── */
+    /* ── Perilla real con anillo de valor ── */
     .knob {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 9px;
+      padding-top: 4px;
       cursor: grab;
       user-select: none;
       touch-action: none;
     }
     .knob:active { cursor: grabbing; }
+    .knob-ring {
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      width: 64px;
+      height: 64px;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .knob-ring-bg,
+    .knob-ring-fg {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      transform: rotate(-225deg);
+      transform-origin: 32px 32px;
+    }
+    .knob-ring-bg {
+      stroke: rgba(255,255,255,0.08);
+      stroke-dasharray: 131.95 43.98;
+    }
+    .knob-ring-fg {
+      stroke: var(--gold-solid);
+      filter: drop-shadow(0 0 4px rgba(200,185,122,0.6));
+      stroke-dasharray: 0 175.93;
+    }
     .knob-body {
       width: 58px; height: 58px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 28%, #3a3a3a, #121212 72%);
+      background: radial-gradient(circle at 35% 28%, #3c3c3c, #131313 72%);
       border: 1px solid rgba(0,0,0,0.6);
       box-shadow:
         0 3px 7px rgba(0,0,0,0.6),
-        inset 0 1px 1px rgba(255,255,255,0.08),
+        inset 0 1px 1px rgba(255,255,255,0.09),
         inset 0 -2px 4px rgba(0,0,0,0.65);
       position: relative;
-    }
-    .knob-body::before {
-      content: '';
-      position: absolute;
-      top: -3px; left: 50%;
-      width: 1px; height: 5px;
-      background: rgba(200,185,122,0.25);
-      transform: translateX(-50%) rotate(-135deg);
-      transform-origin: 50% 32px;
-    }
-    .knob-body::after {
-      content: '';
-      position: absolute;
-      top: -3px; left: 50%;
-      width: 1px; height: 5px;
-      background: rgba(200,185,122,0.25);
-      transform: translateX(-50%) rotate(135deg);
-      transform-origin: 50% 32px;
+      z-index: 1;
     }
     .knob-indicator {
       position: absolute;
@@ -392,7 +456,7 @@
       font-size: 8px;
       letter-spacing: 0.25em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.4);
+      color: rgba(232,228,220,0.45);
     }
     .knob-value {
       font-family: var(--mono);
@@ -411,13 +475,13 @@
       gap: 9px;
     }
     .power-btn {
-      width: 60px; height: 60px;
+      width: 56px; height: 56px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 28%, #2a2a2a, #0a0a0a 75%);
+      background: radial-gradient(circle at 35% 28%, #2c2c2c, #0a0a0a 75%);
       border: 2px solid rgba(0,0,0,0.7);
       box-shadow:
         0 3px 8px rgba(0,0,0,0.6),
-        inset 0 1px 2px rgba(255,255,255,0.08),
+        inset 0 1px 2px rgba(255,255,255,0.09),
         inset 0 -2px 4px rgba(0,0,0,0.7);
       display: flex;
       align-items: center;
@@ -442,7 +506,7 @@
       font-size: 8px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.35);
+      color: rgba(232,228,220,0.4);
     }
 
     /* ── Botón hardware genérico (mutar) ── */
@@ -451,14 +515,14 @@
       font-size: 9px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.5);
-      background: linear-gradient(180deg, #232323, #0e0e0e);
+      color: rgba(232,228,220,0.55);
+      background: linear-gradient(180deg, #262626, #101010);
       border: 1px solid rgba(0,0,0,0.7);
       border-radius: 5px;
       padding: 13px 22px;
       cursor: pointer;
       box-shadow:
-        inset 0 1px 1px rgba(255,255,255,0.06),
+        inset 0 1px 1px rgba(255,255,255,0.07),
         inset 0 -2px 3px rgba(0,0,0,0.6),
         0 1px 0 rgba(255,255,255,0.03);
       transition: color 0.2s, transform 0.1s, box-shadow 0.15s;
@@ -687,11 +751,13 @@
     /* ── Responsive ── */
     @media (max-width: 760px) {
       section { padding: 60px 24px; }
-      .panel { padding: 28px 18px 24px; }
-      .track-label { font-size: 9px; width: 30px; }
+      .panel { padding: 20px 16px 22px; }
+      .panel-header { flex-wrap: wrap; }
+      .lcd { min-width: 100%; order: 3; margin-top: 8px; }
+      .track-label { font-size: 9px; width: 28px; }
       .steps { gap: 3px; }
-      .controls-strip { justify-content: center; gap: 26px; }
-      .knobs-row { gap: 24px; justify-content: center; }
+      .controls-screen { justify-content: center; gap: 22px; }
+      .knobs-row { gap: 22px; justify-content: center; }
 
       .pillars-grid { grid-template-columns: 1fr; }
       .acts { flex-direction: column; gap: 28px; }
@@ -729,11 +795,20 @@
       <div class="screw bl"></div>
       <div class="screw br"></div>
 
-      <p class="panel-plate">Saint Messere — Ritual Sequencer</p>
+      <div class="panel-header">
+        <div class="brand-mark">SM</div>
+        <div class="brand-text">
+          <div class="brand-title">Saint Messere</div>
+          <div class="brand-sub">Ritual Sequencer</div>
+        </div>
+        <div class="lcd" id="lcd">STANDBY</div>
+      </div>
 
-      <div class="sequencer" id="sequencer"></div>
+      <div class="seq-screen">
+        <div class="sequencer" id="sequencer"></div>
+      </div>
 
-      <div class="controls-strip">
+      <div class="controls-screen">
         <div class="power-unit">
           <div class="power-btn" id="powerBtn">
             <div class="power-led"></div>
@@ -743,16 +818,28 @@
 
         <div class="knobs-row">
           <div class="knob" id="knobTempo">
+            <svg class="knob-ring" viewBox="0 0 64 64">
+              <circle class="knob-ring-bg" cx="32" cy="32" r="28"></circle>
+              <circle class="knob-ring-fg" cx="32" cy="32" r="28"></circle>
+            </svg>
             <div class="knob-body"><div class="knob-indicator"></div></div>
             <div class="knob-label">Tempo</div>
             <div class="knob-value" id="knobTempoValue">122</div>
           </div>
           <div class="knob" id="knobFilter">
+            <svg class="knob-ring" viewBox="0 0 64 64">
+              <circle class="knob-ring-bg" cx="32" cy="32" r="28"></circle>
+              <circle class="knob-ring-fg" cx="32" cy="32" r="28"></circle>
+            </svg>
             <div class="knob-body"><div class="knob-indicator"></div></div>
             <div class="knob-label">Filtro</div>
             <div class="knob-value" id="knobFilterValue">900</div>
           </div>
           <div class="knob" id="knobDelay">
+            <svg class="knob-ring" viewBox="0 0 64 64">
+              <circle class="knob-ring-bg" cx="32" cy="32" r="28"></circle>
+              <circle class="knob-ring-fg" cx="32" cy="32" r="28"></circle>
+            </svg>
             <div class="knob-body"><div class="knob-indicator"></div></div>
             <div class="knob-label">Eco</div>
             <div class="knob-value" id="knobDelayValue">25%</div>
@@ -974,7 +1061,7 @@
     });
 
     // ════════════════════════════════════════════════
-    // ── SECUENCIADOR HARDWARE — ritual de entrada ──
+    // ── SECUENCIADOR — carácter de plugin ──
     // ════════════════════════════════════════════════
     const NUM_STEPS = 16;
     const pattern = {
@@ -1027,10 +1114,21 @@
       setTimeout(() => led.classList.remove('lit'), 90);
     }
 
+    const lcd = document.getElementById('lcd');
+    let currentBpm = 122;
+
+    function updateLcd(step) {
+      const stepText = (typeof step === 'number')
+        ? 'STEP ' + String(step + 1).padStart(2, '0') + '/16'
+        : 'STEP --/16';
+      lcd.textContent = Math.round(currentBpm) + ' BPM · ' + stepText;
+    }
+
     function updatePlayhead(step) {
       document.querySelectorAll('.step').forEach(el => {
         el.classList.toggle('playhead', parseInt(el.dataset.index, 10) === step);
       });
+      updateLcd(step);
     }
 
     let contextStarted = false;
@@ -1070,7 +1168,7 @@
         envelope: { attack: 0.02, decay: 0.3, sustain: 0.15, release: 0.5 },
       }).connect(filterNode);
 
-      Tone.Transport.bpm.value = 122;
+      Tone.Transport.bpm.value = currentBpm;
 
       seq = new Tone.Sequence((time, step) => {
         if (pattern.kick[step]) {
@@ -1107,6 +1205,7 @@
         Tone.Transport.stop();
         isPlaying = false;
         powerBtn.classList.remove('on');
+        updateLcd();
       } else {
         Tone.Transport.start();
         isPlaying = true;
@@ -1114,11 +1213,15 @@
       }
     });
 
-    // ── Perilla real (rotary knob) — arrastre vertical controla el valor
+    // ── Perilla real con anillo de valor SVG
+    const RING_C = 2 * Math.PI * 28;
+    const RING_TRACK = RING_C * 0.75;
+
     function setupKnob(el, opts) {
       const min = opts.min, max = opts.max;
       let value = opts.initial;
       const indicator = el.querySelector('.knob-indicator');
+      const ringFg = el.querySelector('.knob-ring-fg');
       const valueLabel = document.getElementById(opts.valueId);
 
       function angleFor(v) {
@@ -1127,7 +1230,10 @@
       }
 
       function render() {
+        const t = (value - min) / (max - min);
         indicator.style.transform = 'rotate(' + angleFor(value) + 'deg)';
+        const len = RING_TRACK * t;
+        ringFg.style.strokeDasharray = len + ' ' + (RING_C - len);
         valueLabel.textContent = opts.format(value);
         opts.onChange(value);
       }
@@ -1166,7 +1272,11 @@
       min: 90, max: 140, initial: 122,
       valueId: 'knobTempoValue',
       format: v => String(Math.round(v)),
-      onChange: v => { if (contextStarted) Tone.Transport.bpm.value = v; },
+      onChange: v => {
+        currentBpm = v;
+        if (contextStarted) Tone.Transport.bpm.value = v;
+        if (!isPlaying) updateLcd();
+      },
     });
 
     setupKnob(document.getElementById('knobFilter'), {
