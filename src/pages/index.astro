@@ -1,5 +1,5 @@
 ---
-// Saint Messere — index.astro — inmersivo 3D
+// Saint Messere — index.astro — inmersivo 3D + ritual de entrada (secuenciador)
 ---
 <html lang="es">
 <head>
@@ -18,6 +18,7 @@
       --mono: 'Courier New', monospace;
       --serif: 'Georgia', serif;
       --gold: rgba(200,185,122,0.15);
+      --gold-solid: #c8b97a;
     }
 
     html { scroll-behavior: smooth; }
@@ -51,7 +52,9 @@
       transform: translate(-50%, -50%);
       transition: width 0.3s, height 0.3s, border-color 0.3s, opacity 0.3s;
     }
-    body:has(a:hover) .cursor-ring {
+    body:has(a:hover) .cursor-ring,
+    body:has(button:hover) .cursor-ring,
+    body:has(.step:hover) .cursor-ring {
       width: 56px; height: 56px;
       border-color: rgba(232,228,220,0.5);
     }
@@ -146,6 +149,222 @@
     [data-reveal="depth"] { transform: translateZ(-40px) scale(0.96); opacity: 0; }
     [data-reveal].visible { opacity: 1; transform: none; }
 
+    /* ── GLOW — texto de acento dorado, pulsación lenta ── */
+    .glow {
+      color: var(--gold-solid);
+      text-shadow: 0 0 6px rgba(200,185,122,0.45), 0 0 16px rgba(200,185,122,0.2);
+      animation: goldBreathe 4.6s ease-in-out infinite;
+    }
+    @keyframes goldBreathe {
+      0%, 100% { text-shadow: 0 0 6px rgba(200,185,122,0.4), 0 0 14px rgba(200,185,122,0.16); }
+      50%      { text-shadow: 0 0 10px rgba(200,185,122,0.65), 0 0 24px rgba(200,185,122,0.3); }
+    }
+
+    /* ── RECEPTION — secuenciador / ritual de entrada ── */
+    .reception {
+      flex-direction: column;
+      gap: 40px;
+      background: var(--bg);
+    }
+    .reception-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+    }
+    .instrument-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 760px;
+    }
+    .sequencer {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .track-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .track-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(232,228,220,0.4);
+      width: 44px;
+      flex-shrink: 0;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 5px;
+      flex: 1;
+    }
+    .step {
+      aspect-ratio: 1;
+      border: 1px solid rgba(232,228,220,0.12);
+      border-radius: 3px;
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .step.beat { border-left-color: rgba(200,185,122,0.3); }
+    .step.active {
+      background: rgba(200,185,122,0.55);
+      border-color: rgba(200,185,122,0.6);
+      box-shadow: 0 0 10px rgba(200,185,122,0.45);
+    }
+    .step.playhead {
+      box-shadow: 0 0 0 1px rgba(232,228,220,0.7) inset, 0 0 10px rgba(232,228,220,0.3);
+    }
+
+    .controls {
+      display: flex;
+      gap: 44px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 26px;
+    }
+    .control {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .control label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(200,185,122,0.5);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 140px;
+      height: 2px;
+      background: rgba(232,228,220,0.15);
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: var(--gold-solid);
+      box-shadow: 0 0 8px rgba(200,185,122,0.5);
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: var(--gold-solid);
+      border: none;
+      box-shadow: 0 0 8px rgba(200,185,122,0.5);
+      cursor: pointer;
+    }
+
+    .ritual-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .ritual-link {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(200,185,122,0.45);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(200,185,122,0.15);
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .ritual-link:hover {
+      color: var(--gold-solid);
+      border-color: rgba(200,185,122,0.6);
+    }
+
+    .gate-overlay {
+      position: absolute;
+      inset: -24px;
+      background: rgba(8,8,8,0.84);
+      backdrop-filter: blur(3px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      z-index: 5;
+      border-radius: 6px;
+      transition: opacity 0.9s ease, visibility 0.9s ease;
+    }
+    .gate-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .gate-btn {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,185,122,0.5);
+      background: rgba(200,185,122,0.06);
+      color: var(--gold-solid);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      animation: gatePulse 3s ease-in-out infinite;
+    }
+    .gate-btn:hover {
+      transform: scale(1.08);
+      border-color: rgba(200,185,122,0.9);
+      box-shadow: 0 0 26px rgba(200,185,122,0.35);
+    }
+    @keyframes gatePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(200,185,122,0.25); }
+      50%      { box-shadow: 0 0 0 14px rgba(200,185,122,0); }
+    }
+    .gate-caption {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      color: rgba(232,228,220,0.3);
+      text-transform: uppercase;
+    }
+
+    .float-mute {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 50;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(200,185,122,0.45);
+      background: rgba(10,10,10,0.55);
+      border: 1px solid rgba(200,185,122,0.2);
+      padding: 10px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease, color 0.3s, border-color 0.3s;
+    }
+    .float-mute.visible { opacity: 1; pointer-events: all; }
+    .float-mute:hover { color: var(--gold-solid); border-color: rgba(200,185,122,0.5); }
+
     /* ── HERO ── */
     .hero {
       flex-direction: column;
@@ -158,7 +377,6 @@
       font-family: var(--mono);
       font-size: 11px;
       letter-spacing: 0.35em;
-      color: var(--ink-dim);
       text-transform: uppercase;
       margin-bottom: 48px;
     }
@@ -184,7 +402,6 @@
       font-family: var(--mono);
       font-size: 11px;
       letter-spacing: 0.25em;
-      color: var(--ink-dim);
     }
 
     .scroll-hint {
@@ -236,7 +453,7 @@
     .m-em   { color: var(--ink); }
     .m-dim  { color: rgba(232,228,220,0.2); }
     .m-mid  { color: rgba(232,228,220,0.55); }
-    .m-italic { font-style: italic; font-size: clamp(14px, 2vw, 20px); color: rgba(232,228,220,0.3); }
+    .m-italic { font-style: italic; font-size: clamp(14px, 2vw, 20px); }
 
     /* ── PILLARS ── */
     .pillars { background: var(--bg); flex-direction: column; gap: 72px; }
@@ -244,7 +461,6 @@
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.45em;
-      color: rgba(232,228,220,0.2);
       text-transform: uppercase;
     }
     .pillars-grid {
@@ -269,7 +485,6 @@
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.2em;
-      color: rgba(232,228,220,0.18);
       margin-bottom: 24px;
     }
     .pillar h3 { font-size: 22px; font-weight: 400; margin-bottom: 18px; line-height: 1.2; }
@@ -298,7 +513,6 @@
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.3em;
-      color: rgba(232,228,220,0.28);
       text-transform: uppercase;
     }
     .act-sep { font-size: 16px; color: rgba(232,228,220,0.08); padding-bottom: 20px; }
@@ -317,7 +531,6 @@
       font-family: var(--mono);
       font-size: 11px;
       letter-spacing: 0.3em;
-      color: rgba(232,228,220,0.18);
     }
     .cierre-links {
       display: flex;
@@ -330,16 +543,17 @@
       font-size: 10px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.35);
+      color: rgba(200,185,122,0.45);
       text-decoration: none;
       padding-bottom: 4px;
-      border-bottom: 1px solid rgba(232,228,220,0.1);
-      transition: color 0.3s, border-color 0.3s, transform 0.3s;
+      border-bottom: 1px solid rgba(200,185,122,0.15);
+      transition: color 0.3s, border-color 0.3s, transform 0.3s, text-shadow 0.3s;
       display: inline-block;
     }
     .cierre-link:hover {
-      color: var(--ink);
-      border-color: rgba(232,228,220,0.45);
+      color: var(--gold-solid);
+      border-color: rgba(200,185,122,0.6);
+      text-shadow: 0 0 10px rgba(200,185,122,0.6), 0 0 22px rgba(200,185,122,0.3);
       transform: translateY(-2px);
     }
 
@@ -360,18 +574,20 @@
       .act-sep { transform: rotate(90deg); }
       .cierre-links { gap: 24px; flex-wrap: wrap; justify-content: center; }
 
-      .hero-eyebrow { font-size: 13px; color: rgba(232,228,220,0.55); }
-      .hero-sub { font-size: 13px; color: rgba(232,228,220,0.55); }
+      .hero-eyebrow { font-size: 13px; }
+      .hero-sub { font-size: 13px; }
       .m-dim { color: rgba(232,228,220,0.45); }
-      .m-italic { font-size: 16px; color: rgba(232,228,220,0.55); }
+      .m-italic { font-size: 16px; }
       .pillar p { font-size: 13px; color: rgba(232,228,220,0.55); line-height: 2; }
-      .pillar-num { color: rgba(232,228,220,0.35); }
-      .pillars-label { font-size: 12px; color: rgba(232,228,220,0.4); }
-      .act-label { font-size: 12px; color: rgba(232,228,220,0.5); }
-      .cierre-sig { font-size: 12px; color: rgba(232,228,220,0.4); }
-      .cierre-link { font-size: 12px; color: rgba(232,228,220,0.6); }
+      .pillars-label { font-size: 12px; }
+      .act-label { font-size: 12px; }
+      .cierre-sig { font-size: 12px; }
+      .cierre-link { font-size: 12px; }
       .cierre-quote { font-size: clamp(18px, 4.5vw, 26px); color: rgba(232,228,220,0.65); }
-      .scroll-hint span { color: rgba(232,228,220,0.4); }
+
+      .track-label { font-size: 9px; width: 36px; }
+      .steps { gap: 3px; }
+      .controls { gap: 28px; }
     }
   </style>
 </head>
@@ -381,8 +597,46 @@
   <div class="vignette"></div>
   <div class="cursor" id="cursor"></div>
   <div class="cursor-ring" id="cursorRing"></div>
+  <button class="float-mute" id="floatMute">Silenciar</button>
 
   <div id="world">
+
+    <!-- ── RECEPTION — ritual de entrada / secuenciador ── -->
+    <section class="reception" id="reception">
+      <div class="depth-far ghost" style="font-size:clamp(140px,24vw,260px);top:-10%;left:-5%;opacity:0.025;">∴</div>
+
+      <p class="reception-eyebrow glow">El ritual de entrada</p>
+
+      <div class="instrument-wrap">
+        <div class="sequencer" id="sequencer"></div>
+
+        <div class="controls">
+          <div class="control">
+            <label>Tempo</label>
+            <input type="range" id="tempoSlider" min="90" max="140" step="1" value="122" />
+          </div>
+          <div class="control">
+            <label>Filtro</label>
+            <input type="range" id="filterSlider" min="200" max="4000" step="10" value="900" />
+          </div>
+          <div class="control">
+            <label>Eco</label>
+            <input type="range" id="delaySlider" min="0" max="0.7" step="0.01" value="0.25" />
+          </div>
+        </div>
+
+        <div class="ritual-actions">
+          <button class="ritual-link" id="mutateBtn">Mutar patrón</button>
+        </div>
+
+        <div class="gate-overlay" id="gate">
+          <div class="gate-btn" id="gateBtn">Encender</div>
+          <p class="gate-caption">Activa el sonido para comenzar</p>
+        </div>
+      </div>
+
+      <div class="scroll-hint"><span>Desplaza para entrar al teatro</span></div>
+    </section>
 
     <!-- ── HERO ── -->
     <section class="hero">
@@ -413,27 +667,27 @@
         <p class="m-line m-dim"    data-reveal="left" data-delay="80">No explica.</p>
         <p class="m-line m-em"     data-reveal="left" data-delay="160">No vende.</p>
         <p class="m-line m-mid"    data-reveal="left" data-delay="240">Insinúa. Provoca. Atrae.</p>
-        <p class="m-line m-italic" data-reveal="left" data-delay="340">"El universo se construye lento.<br>Primero la familia, luego el mito."</p>
+        <p class="m-line m-italic glow" data-reveal="left" data-delay="340">"El universo se construye lento.<br>Primero la familia, luego el mito."</p>
       </div>
     </section>
 
     <!-- ── PILLARS ── -->
     <section class="pillars">
       <div class="depth-far ghost" style="font-size:clamp(100px,16vw,200px);bottom:0;right:5%;opacity:0.025;">·</div>
-      <p class="pillars-label depth-near" data-reveal="fade">El sistema</p>
+      <p class="pillars-label glow depth-near" data-reveal="fade">El sistema</p>
       <div class="pillars-grid depth-near">
         <div class="pillar" data-reveal="up" data-delay="0">
-          <div class="pillar-num">01</div>
+          <div class="pillar-num glow">01</div>
           <h3>El personaje</h3>
           <p>Satírico pero preciso.<br>Elegante pero callejero.<br>Un narrador que juega.</p>
         </div>
         <div class="pillar" data-reveal="up" data-delay="120">
-          <div class="pillar-num">02</div>
+          <div class="pillar-num glow">02</div>
           <h3>El teatro</h3>
           <p>Cada acto es una escena.<br>Cada visita es participar.<br>No se observa — se habita.</p>
         </div>
         <div class="pillar" data-reveal="up" data-delay="240">
-          <div class="pillar-num">03</div>
+          <div class="pillar-num glow">03</div>
           <h3>El círculo</h3>
           <p>No busca audiencia.<br>Construye familia.<br>Por afinidad, no algoritmo.</p>
         </div>
@@ -451,17 +705,17 @@
       <div class="acts depth-near" data-reveal="up" data-delay="200">
         <div class="act">
           <div class="act-symbol">◯</div>
-          <div class="act-label">Interacción</div>
+          <div class="act-label glow">Interacción</div>
         </div>
         <div class="act-sep">→</div>
         <div class="act">
           <div class="act-symbol">◈</div>
-          <div class="act-label">Interpretación</div>
+          <div class="act-label glow">Interpretación</div>
         </div>
         <div class="act-sep">→</div>
         <div class="act">
           <div class="act-symbol">◉</div>
-          <div class="act-label">Participación</div>
+          <div class="act-label glow">Participación</div>
         </div>
       </div>
     </section>
@@ -472,7 +726,7 @@
       <p class="cierre-quote depth-near" data-reveal="depth">
         Un universo narrativo íntimo donde el lenguaje,<br>la estética y el silencio generan una experiencia<br>que mezcla <strong>arte, seducción y pensamiento.</strong>
       </p>
-      <p class="cierre-sig depth-near" data-reveal="fade" data-delay="200">— Saint Messere</p>
+      <p class="cierre-sig glow depth-near" data-reveal="fade" data-delay="200">— Saint Messere</p>
       <nav class="cierre-links depth-near" data-reveal="up" data-delay="350">
         <a href="https://on.soundcloud.com/dXyF4x4jJx3oxKWEZS" target="_blank" class="cierre-link">Audition</a>
         <a href="/gallery" class="cierre-link">Gallery</a>
@@ -483,6 +737,7 @@
 
   </div><!-- /world -->
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <script>
     // ── Cursor
     const cursor = document.getElementById('cursor');
@@ -516,8 +771,8 @@
     })();
 
     // ── Scroll parallax en capas de profundidad
-    const farLayers  = document.querySelectorAll('.depth-far');
-    const midLayers  = document.querySelectorAll('.depth-mid');
+    const farLayers = document.querySelectorAll('.depth-far');
+    const midLayers = document.querySelectorAll('.depth-mid');
 
     window.addEventListener('scroll', () => {
       const sy = window.scrollY;
@@ -586,6 +841,156 @@
     // Hero reveal on load
     document.querySelectorAll('.hero [data-reveal]').forEach((el, i) => {
       setTimeout(() => el.classList.add('visible'), 400 + i * 200);
+    });
+
+    // ════════════════════════════════════════
+    // ── SECUENCIADOR — ritual de entrada ──
+    // ════════════════════════════════════════
+    const NUM_STEPS = 16;
+    const pattern = {
+      kick: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
+      hat:  [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0],
+      perc: [0,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,0,1],
+      bass: [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0],
+    };
+    const TRACKS = ['kick', 'hat', 'perc', 'bass'];
+    const TRACK_LABELS = { kick: 'Kick', hat: 'Hat', perc: 'Perc', bass: 'Bass' };
+
+    const seqEl = document.getElementById('sequencer');
+    TRACKS.forEach(track => {
+      const row = document.createElement('div');
+      row.className = 'track-row';
+
+      const label = document.createElement('div');
+      label.className = 'track-label';
+      label.textContent = TRACK_LABELS[track];
+      row.appendChild(label);
+
+      const stepsWrap = document.createElement('div');
+      stepsWrap.className = 'steps';
+
+      for (let i = 0; i < NUM_STEPS; i++) {
+        const step = document.createElement('div');
+        step.className = 'step' + (pattern[track][i] ? ' active' : '') + (i % 4 === 0 ? ' beat' : '');
+        step.dataset.track = track;
+        step.dataset.index = String(i);
+        step.addEventListener('click', () => {
+          pattern[track][i] = pattern[track][i] ? 0 : 1;
+          step.classList.toggle('active');
+        });
+        stepsWrap.appendChild(step);
+      }
+
+      row.appendChild(stepsWrap);
+      seqEl.appendChild(row);
+    });
+
+    let toneStarted = false;
+    let filterNode, delayNode, kickSynth, hatSynth, percSynth, bassSynth, seq;
+
+    function buildAudio() {
+      filterNode = new Tone.Filter(900, 'lowpass');
+      delayNode = new Tone.FeedbackDelay('8n', 0.3);
+      delayNode.wet.value = 0.25;
+
+      filterNode.connect(delayNode);
+      delayNode.toDestination();
+
+      kickSynth = new Tone.MembraneSynth({
+        pitchDecay: 0.05,
+        octaves: 6,
+        envelope: { attack: 0.001, decay: 0.35, sustain: 0 },
+      }).toDestination();
+
+      hatSynth = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.001, decay: 0.04, sustain: 0 },
+      }).connect(filterNode);
+
+      percSynth = new Tone.MetalSynth({
+        frequency: 220,
+        envelope: { attack: 0.001, decay: 0.15, release: 0.05 },
+        harmonicity: 5.1,
+        modulationIndex: 16,
+        resonance: 3000,
+        octaves: 1.2,
+      }).connect(filterNode);
+
+      bassSynth = new Tone.Synth({
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.02, decay: 0.3, sustain: 0.15, release: 0.5 },
+      }).connect(filterNode);
+
+      Tone.Transport.bpm.value = 122;
+
+      seq = new Tone.Sequence((time, step) => {
+        if (pattern.kick[step]) kickSynth.triggerAttackRelease('C1', '8n', time);
+        if (pattern.hat[step])  hatSynth.triggerAttackRelease('16n', time);
+        if (pattern.perc[step]) percSynth.triggerAttackRelease('16n', time);
+        if (pattern.bass[step]) bassSynth.triggerAttackRelease('D1', '4n', time);
+        Tone.Draw.schedule(() => updatePlayhead(step), time);
+      }, [...Array(NUM_STEPS).keys()], '16n');
+    }
+
+    function updatePlayhead(step) {
+      document.querySelectorAll('.step').forEach(el => {
+        el.classList.toggle('playhead', parseInt(el.dataset.index, 10) === step);
+      });
+    }
+
+    const gate = document.getElementById('gate');
+    const gateBtn = document.getElementById('gateBtn');
+
+    gateBtn.addEventListener('click', async () => {
+      if (toneStarted) return;
+      toneStarted = true;
+      await Tone.start();
+      buildAudio();
+      seq.start(0);
+      Tone.Transport.start();
+      gate.classList.add('hidden');
+    });
+
+    document.getElementById('tempoSlider').addEventListener('input', e => {
+      Tone.Transport.bpm.value = parseFloat(e.target.value);
+    });
+
+    document.getElementById('filterSlider').addEventListener('input', e => {
+      if (filterNode) filterNode.frequency.value = parseFloat(e.target.value);
+    });
+
+    document.getElementById('delaySlider').addEventListener('input', e => {
+      if (delayNode) delayNode.wet.value = parseFloat(e.target.value);
+    });
+
+    document.getElementById('mutateBtn').addEventListener('click', () => {
+      ['hat', 'perc'].forEach(track => {
+        for (let i = 0; i < NUM_STEPS; i++) {
+          if (Math.random() < 0.18) pattern[track][i] = pattern[track][i] ? 0 : 1;
+        }
+      });
+      document.querySelectorAll('.step').forEach(el => {
+        const t = el.dataset.track;
+        const i = parseInt(el.dataset.index, 10);
+        el.classList.toggle('active', !!pattern[t][i]);
+      });
+    });
+
+    // ── Control flotante de silencio tras pasar la recepción
+    const floatMute = document.getElementById('floatMute');
+    const receptionSection = document.getElementById('reception');
+    let muted = false;
+
+    window.addEventListener('scroll', () => {
+      const rect = receptionSection.getBoundingClientRect();
+      floatMute.classList.toggle('visible', rect.bottom < 0);
+    }, { passive: true });
+
+    floatMute.addEventListener('click', () => {
+      if (!toneStarted) return;
+      muted = !muted;
+      Tone.Destination.mute = muted;
+      floatMute.textContent = muted ? 'Reanudar' : 'Silenciar';
     });
   </script>
 
