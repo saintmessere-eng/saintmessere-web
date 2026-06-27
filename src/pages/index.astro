@@ -1,5 +1,5 @@
 ---
-// Saint Messere — index.astro — inmersivo 3D + ritual de entrada (secuenciador)
+// Saint Messere — index.astro — secuenciador hardware (ritual de entrada) + sitio inmersivo
 ---
 <html lang="es">
 <head>
@@ -54,7 +54,8 @@
     }
     body:has(a:hover) .cursor-ring,
     body:has(button:hover) .cursor-ring,
-    body:has(.step:hover) .cursor-ring {
+    body:has(.step:hover) .cursor-ring,
+    body:has(.knob:hover) .cursor-ring {
       width: 56px; height: 56px;
       border-color: rgba(232,228,220,0.5);
     }
@@ -78,7 +79,16 @@
       pointer-events: none;
     }
 
-    /* ── World — responde al mouse ── */
+    /* ── Vignette ── */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
+    }
+
+    /* ── World — responde al mouse (NO incluye la recepción) ── */
     #world {
       position: relative;
       z-index: 1;
@@ -160,11 +170,14 @@
       50%      { text-shadow: 0 0 10px rgba(200,185,122,0.65), 0 0 24px rgba(200,185,122,0.3); }
     }
 
-    /* ── RECEPTION — secuenciador / ritual de entrada ── */
+    /* ═══════════════════════════════════════════
+       RECEPTION — secuenciador hardware (fuera de #world)
+       ═══════════════════════════════════════════ */
     .reception {
       flex-direction: column;
-      gap: 40px;
+      gap: 36px;
       background: var(--bg);
+      z-index: 3;
     }
     .reception-eyebrow {
       font-family: var(--mono);
@@ -172,30 +185,93 @@
       letter-spacing: 0.4em;
       text-transform: uppercase;
     }
-    .instrument-wrap {
+
+    /* ── Panel de metal ── */
+    .panel {
       position: relative;
       width: 100%;
-      max-width: 760px;
+      max-width: 860px;
+      background: linear-gradient(160deg, #1b1b1b, #0b0b0b 65%);
+      border-radius: 16px;
+      padding: 38px 36px 32px;
+      border: 1px solid rgba(0,0,0,0.7);
+      box-shadow:
+        0 24px 60px rgba(0,0,0,0.65),
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        inset 0 -1px 0 rgba(0,0,0,0.6);
     }
+    .panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(98deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    }
+    .panel-plate {
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      color: rgba(232,228,220,0.22);
+      text-transform: uppercase;
+      margin-bottom: 30px;
+    }
+    .screw {
+      position: absolute;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #5a5a5a, #0d0d0d 72%);
+      box-shadow: inset 0 0 2px rgba(0,0,0,0.85), 0 1px 1px rgba(255,255,255,0.06);
+      z-index: 2;
+    }
+    .screw::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 14%;
+      width: 72%; height: 1px;
+      background: rgba(0,0,0,0.65);
+      transform: translateY(-50%) rotate(35deg);
+    }
+    .screw.tl { top: 12px; left: 12px; }
+    .screw.tr { top: 12px; right: 12px; }
+    .screw.bl { bottom: 12px; left: 12px; }
+    .screw.br { bottom: 12px; right: 12px; }
+
+    /* ── Grilla de pasos ── */
     .sequencer {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      width: 100%;
+      gap: 13px;
+      position: relative;
+      z-index: 1;
     }
     .track-row {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
     }
     .track-label {
       font-family: var(--mono);
       font-size: 10px;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.4);
-      width: 44px;
+      color: rgba(232,228,220,0.45);
+      width: 38px;
       flex-shrink: 0;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    }
+    .track-led {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(232,228,220,0.08);
+      box-shadow: inset 0 0 2px rgba(0,0,0,0.6);
+      flex-shrink: 0;
+      transition: background 0.05s, box-shadow 0.05s;
+    }
+    .track-led.lit {
+      background: var(--gold-solid);
+      box-shadow: 0 0 7px 2px rgba(200,185,122,0.85);
     }
     .steps {
       display: grid;
@@ -205,144 +281,195 @@
     }
     .step {
       aspect-ratio: 1;
-      border: 1px solid rgba(232,228,220,0.12);
-      border-radius: 3px;
+      border-radius: 4px;
       cursor: pointer;
-      background: transparent;
-      transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      background: linear-gradient(180deg, #1d1d1d, #0a0a0a);
+      border: 1px solid rgba(0,0,0,0.65);
+      box-shadow:
+        inset 0 2px 3px rgba(0,0,0,0.85),
+        inset 0 -1px 1px rgba(255,255,255,0.04);
+      position: relative;
+      transition: box-shadow 0.15s ease;
     }
-    .step.beat { border-left-color: rgba(200,185,122,0.3); }
-    .step.active {
-      background: rgba(200,185,122,0.55);
-      border-color: rgba(200,185,122,0.6);
-      box-shadow: 0 0 10px rgba(200,185,122,0.45);
+    .step.beat {
+      box-shadow:
+        inset 0 0 0 1px rgba(200,185,122,0.16),
+        inset 0 2px 3px rgba(0,0,0,0.85);
+    }
+    .step::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 32%; height: 32%;
+      border-radius: 50%;
+      background: rgba(232,228,220,0.05);
+      transform: translate(-50%, -50%);
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .step.active::after {
+      background: var(--gold-solid);
+      box-shadow: 0 0 7px 2px rgba(200,185,122,0.8), 0 0 16px 4px rgba(200,185,122,0.32);
     }
     .step.playhead {
-      box-shadow: 0 0 0 1px rgba(232,228,220,0.7) inset, 0 0 10px rgba(232,228,220,0.3);
+      box-shadow:
+        inset 0 0 0 1px rgba(232,228,220,0.55),
+        inset 0 2px 3px rgba(0,0,0,0.85),
+        0 0 9px rgba(232,228,220,0.22);
     }
 
-    .controls {
+    /* ── Tira de controles ── */
+    .controls-strip {
       display: flex;
-      gap: 44px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
       flex-wrap: wrap;
-      justify-content: center;
-      margin-top: 26px;
+      margin-top: 32px;
+      position: relative;
+      z-index: 1;
     }
-    .control {
+    .knobs-row {
+      display: flex;
+      gap: 34px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Perilla real (rotary knob) ── */
+    .knob {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
     }
-    .control label {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: rgba(200,185,122,0.5);
-    }
-
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 140px;
-      height: 2px;
-      background: rgba(232,228,220,0.15);
-      border-radius: 2px;
-      outline: none;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 11px; height: 11px;
+    .knob:active { cursor: grabbing; }
+    .knob-body {
+      width: 58px; height: 58px;
       border-radius: 50%;
-      background: var(--gold-solid);
-      box-shadow: 0 0 8px rgba(200,185,122,0.5);
-      cursor: pointer;
+      background: radial-gradient(circle at 35% 28%, #3a3a3a, #121212 72%);
+      border: 1px solid rgba(0,0,0,0.6);
+      box-shadow:
+        0 3px 7px rgba(0,0,0,0.6),
+        inset 0 1px 1px rgba(255,255,255,0.08),
+        inset 0 -2px 4px rgba(0,0,0,0.65);
+      position: relative;
     }
-    input[type="range"]::-moz-range-thumb {
-      width: 11px; height: 11px;
-      border-radius: 50%;
-      background: var(--gold-solid);
-      border: none;
-      box-shadow: 0 0 8px rgba(200,185,122,0.5);
-      cursor: pointer;
-    }
-
-    .ritual-actions {
-      display: flex;
-      justify-content: center;
-      margin-top: 12px;
-    }
-    .ritual-link {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: rgba(200,185,122,0.45);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding-bottom: 4px;
-      border-bottom: 1px solid rgba(200,185,122,0.15);
-      transition: color 0.3s, border-color 0.3s;
-    }
-    .ritual-link:hover {
-      color: var(--gold-solid);
-      border-color: rgba(200,185,122,0.6);
-    }
-
-    .gate-overlay {
+    .knob-body::before {
+      content: '';
       position: absolute;
-      inset: -24px;
-      background: rgba(8,8,8,0.84);
-      backdrop-filter: blur(3px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 22px;
-      z-index: 5;
-      border-radius: 6px;
-      transition: opacity 0.9s ease, visibility 0.9s ease;
+      top: -3px; left: 50%;
+      width: 1px; height: 5px;
+      background: rgba(200,185,122,0.25);
+      transform: translateX(-50%) rotate(-135deg);
+      transform-origin: 50% 32px;
     }
-    .gate-overlay.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
+    .knob-body::after {
+      content: '';
+      position: absolute;
+      top: -3px; left: 50%;
+      width: 1px; height: 5px;
+      background: rgba(200,185,122,0.25);
+      transform: translateX(-50%) rotate(135deg);
+      transform-origin: 50% 32px;
     }
-    .gate-btn {
-      width: 96px; height: 96px;
-      border-radius: 50%;
-      border: 1px solid rgba(200,185,122,0.5);
-      background: rgba(200,185,122,0.06);
-      color: var(--gold-solid);
+    .knob-indicator {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      width: 2px;
+      height: 20px;
+      margin-left: -1px;
+      background: var(--gold-solid);
+      box-shadow: 0 0 6px rgba(200,185,122,0.7);
+      border-radius: 1px;
+      transform-origin: 50% 100%;
+      transform: rotate(0deg);
+    }
+    .knob-label {
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(232,228,220,0.4);
+    }
+    .knob-value {
       font-family: var(--mono);
       font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      cursor: pointer;
+      color: var(--gold-solid);
+      text-shadow: 0 0 5px rgba(200,185,122,0.35);
+      min-width: 44px;
+      text-align: center;
+    }
+
+    /* ── Power ── */
+    .power-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+    }
+    .power-btn {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 28%, #2a2a2a, #0a0a0a 75%);
+      border: 2px solid rgba(0,0,0,0.7);
+      box-shadow:
+        0 3px 8px rgba(0,0,0,0.6),
+        inset 0 1px 2px rgba(255,255,255,0.08),
+        inset 0 -2px 4px rgba(0,0,0,0.7);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-      animation: gatePulse 3s ease-in-out infinite;
+      cursor: pointer;
+      transition: transform 0.15s;
     }
-    .gate-btn:hover {
-      transform: scale(1.08);
-      border-color: rgba(200,185,122,0.9);
-      box-shadow: 0 0 26px rgba(200,185,122,0.35);
+    .power-btn:active { transform: scale(0.94); }
+    .power-led {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: rgba(200,60,40,0.45);
+      box-shadow: inset 0 0 2px rgba(0,0,0,0.5);
+      transition: background 0.3s, box-shadow 0.3s;
     }
-    @keyframes gatePulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(200,185,122,0.25); }
-      50%      { box-shadow: 0 0 0 14px rgba(200,185,122,0); }
+    .power-btn.on .power-led {
+      background: #ff5a3c;
+      box-shadow: 0 0 9px 3px rgba(255,90,60,0.75), 0 0 20px 6px rgba(255,90,60,0.35);
     }
-    .gate-caption {
+    .power-label {
       font-family: var(--mono);
-      font-size: 9px;
+      font-size: 8px;
       letter-spacing: 0.3em;
-      color: rgba(232,228,220,0.3);
       text-transform: uppercase;
+      color: rgba(232,228,220,0.35);
     }
 
+    /* ── Botón hardware genérico (mutar) ── */
+    .hw-button {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(232,228,220,0.5);
+      background: linear-gradient(180deg, #232323, #0e0e0e);
+      border: 1px solid rgba(0,0,0,0.7);
+      border-radius: 5px;
+      padding: 13px 22px;
+      cursor: pointer;
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.06),
+        inset 0 -2px 3px rgba(0,0,0,0.6),
+        0 1px 0 rgba(255,255,255,0.03);
+      transition: color 0.2s, transform 0.1s, box-shadow 0.15s;
+    }
+    .hw-button:hover { color: var(--gold-solid); }
+    .hw-button:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.7);
+    }
+
+    /* ── Mute flotante ── */
     .float-mute {
       position: fixed;
       bottom: 28px;
@@ -557,18 +684,15 @@
       transform: translateY(-2px);
     }
 
-    /* ── Vignette ── */
-    .vignette {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
-    }
-
     /* ── Responsive ── */
-    @media (max-width: 720px) {
-      section { padding: 60px 28px; }
+    @media (max-width: 760px) {
+      section { padding: 60px 24px; }
+      .panel { padding: 28px 18px 24px; }
+      .track-label { font-size: 9px; width: 30px; }
+      .steps { gap: 3px; }
+      .controls-strip { justify-content: center; gap: 26px; }
+      .knobs-row { gap: 24px; justify-content: center; }
+
       .pillars-grid { grid-template-columns: 1fr; }
       .acts { flex-direction: column; gap: 28px; }
       .act-sep { transform: rotate(90deg); }
@@ -584,10 +708,6 @@
       .cierre-sig { font-size: 12px; }
       .cierre-link { font-size: 12px; }
       .cierre-quote { font-size: clamp(18px, 4.5vw, 26px); color: rgba(232,228,220,0.65); }
-
-      .track-label { font-size: 9px; width: 36px; }
-      .steps { gap: 3px; }
-      .controls { gap: 28px; }
     }
   </style>
 </head>
@@ -599,44 +719,54 @@
   <div class="cursor-ring" id="cursorRing"></div>
   <button class="float-mute" id="floatMute">Silenciar</button>
 
-  <div id="world">
+  <!-- ── RECEPTION — fuera de #world: no recibe el tilt 3D ── -->
+  <section class="reception" id="reception">
+    <p class="reception-eyebrow glow">El ritual de entrada</p>
 
-    <!-- ── RECEPTION — ritual de entrada / secuenciador ── -->
-    <section class="reception" id="reception">
-      <div class="depth-far ghost" style="font-size:clamp(140px,24vw,260px);top:-10%;left:-5%;opacity:0.025;">∴</div>
+    <div class="panel">
+      <div class="screw tl"></div>
+      <div class="screw tr"></div>
+      <div class="screw bl"></div>
+      <div class="screw br"></div>
 
-      <p class="reception-eyebrow glow">El ritual de entrada</p>
+      <p class="panel-plate">Saint Messere — Ritual Sequencer</p>
 
-      <div class="instrument-wrap">
-        <div class="sequencer" id="sequencer"></div>
+      <div class="sequencer" id="sequencer"></div>
 
-        <div class="controls">
-          <div class="control">
-            <label>Tempo</label>
-            <input type="range" id="tempoSlider" min="90" max="140" step="1" value="122" />
+      <div class="controls-strip">
+        <div class="power-unit">
+          <div class="power-btn" id="powerBtn">
+            <div class="power-led"></div>
           </div>
-          <div class="control">
-            <label>Filtro</label>
-            <input type="range" id="filterSlider" min="200" max="4000" step="10" value="900" />
+          <span class="power-label">Power</span>
+        </div>
+
+        <div class="knobs-row">
+          <div class="knob" id="knobTempo">
+            <div class="knob-body"><div class="knob-indicator"></div></div>
+            <div class="knob-label">Tempo</div>
+            <div class="knob-value" id="knobTempoValue">122</div>
           </div>
-          <div class="control">
-            <label>Eco</label>
-            <input type="range" id="delaySlider" min="0" max="0.7" step="0.01" value="0.25" />
+          <div class="knob" id="knobFilter">
+            <div class="knob-body"><div class="knob-indicator"></div></div>
+            <div class="knob-label">Filtro</div>
+            <div class="knob-value" id="knobFilterValue">900</div>
+          </div>
+          <div class="knob" id="knobDelay">
+            <div class="knob-body"><div class="knob-indicator"></div></div>
+            <div class="knob-label">Eco</div>
+            <div class="knob-value" id="knobDelayValue">25%</div>
           </div>
         </div>
 
-        <div class="ritual-actions">
-          <button class="ritual-link" id="mutateBtn">Mutar patrón</button>
-        </div>
-
-        <div class="gate-overlay" id="gate">
-          <div class="gate-btn" id="gateBtn">Encender</div>
-          <p class="gate-caption">Activa el sonido para comenzar</p>
-        </div>
+        <button class="hw-button" id="mutateBtn">Mutar</button>
       </div>
+    </div>
 
-      <div class="scroll-hint"><span>Desplaza para entrar al teatro</span></div>
-    </section>
+    <div class="scroll-hint"><span>Desplaza para entrar al teatro</span></div>
+  </section>
+
+  <div id="world">
 
     <!-- ── HERO ── -->
     <section class="hero">
@@ -737,7 +867,7 @@
 
   </div><!-- /world -->
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/15.3.5/Tone.js"></script>
   <script>
     // ── Cursor
     const cursor = document.getElementById('cursor');
@@ -753,7 +883,7 @@
       requestAnimationFrame(animRing);
     })();
 
-    // ── Mouse parallax 3D en el world
+    // ── Mouse parallax 3D — SOLO afecta a #world (la recepción queda fuera, fija)
     const world = document.getElementById('world');
     const W = window.innerWidth, H = window.innerHeight;
     let tx = 0, ty = 0, cx = 0, cy = 0;
@@ -843,9 +973,9 @@
       setTimeout(() => el.classList.add('visible'), 400 + i * 200);
     });
 
-    // ════════════════════════════════════════
-    // ── SECUENCIADOR — ritual de entrada ──
-    // ════════════════════════════════════════
+    // ════════════════════════════════════════════════
+    // ── SECUENCIADOR HARDWARE — ritual de entrada ──
+    // ════════════════════════════════════════════════
     const NUM_STEPS = 16;
     const pattern = {
       kick: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
@@ -866,6 +996,11 @@
       label.textContent = TRACK_LABELS[track];
       row.appendChild(label);
 
+      const led = document.createElement('div');
+      led.className = 'track-led';
+      led.dataset.track = track;
+      row.appendChild(led);
+
       const stepsWrap = document.createElement('div');
       stepsWrap.className = 'steps';
 
@@ -885,7 +1020,21 @@
       seqEl.appendChild(row);
     });
 
-    let toneStarted = false;
+    function flashLed(track) {
+      const led = document.querySelector('.track-led[data-track="' + track + '"]');
+      if (!led) return;
+      led.classList.add('lit');
+      setTimeout(() => led.classList.remove('lit'), 90);
+    }
+
+    function updatePlayhead(step) {
+      document.querySelectorAll('.step').forEach(el => {
+        el.classList.toggle('playhead', parseInt(el.dataset.index, 10) === step);
+      });
+    }
+
+    let contextStarted = false;
+    let isPlaying = false;
     let filterNode, delayNode, kickSynth, hatSynth, percSynth, bassSynth, seq;
 
     function buildAudio() {
@@ -924,45 +1073,117 @@
       Tone.Transport.bpm.value = 122;
 
       seq = new Tone.Sequence((time, step) => {
-        if (pattern.kick[step]) kickSynth.triggerAttackRelease('C1', '8n', time);
-        if (pattern.hat[step])  hatSynth.triggerAttackRelease('16n', time);
-        if (pattern.perc[step]) percSynth.triggerAttackRelease('16n', time);
-        if (pattern.bass[step]) bassSynth.triggerAttackRelease('D1', '4n', time);
+        if (pattern.kick[step]) {
+          kickSynth.triggerAttackRelease('C1', '8n', time);
+          Tone.Draw.schedule(() => flashLed('kick'), time);
+        }
+        if (pattern.hat[step]) {
+          hatSynth.triggerAttackRelease('16n', time);
+          Tone.Draw.schedule(() => flashLed('hat'), time);
+        }
+        if (pattern.perc[step]) {
+          percSynth.triggerAttackRelease('16n', time);
+          Tone.Draw.schedule(() => flashLed('perc'), time);
+        }
+        if (pattern.bass[step]) {
+          bassSynth.triggerAttackRelease('D1', '4n', time);
+          Tone.Draw.schedule(() => flashLed('bass'), time);
+        }
         Tone.Draw.schedule(() => updatePlayhead(step), time);
       }, [...Array(NUM_STEPS).keys()], '16n');
     }
 
-    function updatePlayhead(step) {
-      document.querySelectorAll('.step').forEach(el => {
-        el.classList.toggle('playhead', parseInt(el.dataset.index, 10) === step);
-      });
+    // ── Power button — primer clic arranca el contexto de audio (gesto requerido por el navegador)
+    const powerBtn = document.getElementById('powerBtn');
+
+    powerBtn.addEventListener('click', async () => {
+      if (!contextStarted) {
+        await Tone.start();
+        buildAudio();
+        seq.start(0);
+        contextStarted = true;
+      }
+      if (isPlaying) {
+        Tone.Transport.stop();
+        isPlaying = false;
+        powerBtn.classList.remove('on');
+      } else {
+        Tone.Transport.start();
+        isPlaying = true;
+        powerBtn.classList.add('on');
+      }
+    });
+
+    // ── Perilla real (rotary knob) — arrastre vertical controla el valor
+    function setupKnob(el, opts) {
+      const min = opts.min, max = opts.max;
+      let value = opts.initial;
+      const indicator = el.querySelector('.knob-indicator');
+      const valueLabel = document.getElementById(opts.valueId);
+
+      function angleFor(v) {
+        const t = (v - min) / (max - min);
+        return -135 + t * 270;
+      }
+
+      function render() {
+        indicator.style.transform = 'rotate(' + angleFor(value) + 'deg)';
+        valueLabel.textContent = opts.format(value);
+        opts.onChange(value);
+      }
+
+      let dragging = false;
+      let startY = 0;
+      let startValue = 0;
+
+      function start(y) {
+        dragging = true;
+        startY = y;
+        startValue = value;
+      }
+      function move(y) {
+        if (!dragging) return;
+        const delta = startY - y;
+        const range = max - min;
+        const sensitivity = range / 160;
+        value = Math.min(max, Math.max(min, startValue + delta * sensitivity));
+        render();
+      }
+      function end() { dragging = false; }
+
+      el.addEventListener('mousedown', e => { start(e.clientY); e.preventDefault(); });
+      window.addEventListener('mousemove', e => move(e.clientY));
+      window.addEventListener('mouseup', end);
+
+      el.addEventListener('touchstart', e => start(e.touches[0].clientY), { passive: true });
+      window.addEventListener('touchmove', e => { if (dragging) move(e.touches[0].clientY); }, { passive: true });
+      window.addEventListener('touchend', end);
+
+      render();
     }
 
-    const gate = document.getElementById('gate');
-    const gateBtn = document.getElementById('gateBtn');
-
-    gateBtn.addEventListener('click', async () => {
-      if (toneStarted) return;
-      toneStarted = true;
-      await Tone.start();
-      buildAudio();
-      seq.start(0);
-      Tone.Transport.start();
-      gate.classList.add('hidden');
+    setupKnob(document.getElementById('knobTempo'), {
+      min: 90, max: 140, initial: 122,
+      valueId: 'knobTempoValue',
+      format: v => String(Math.round(v)),
+      onChange: v => { if (contextStarted) Tone.Transport.bpm.value = v; },
     });
 
-    document.getElementById('tempoSlider').addEventListener('input', e => {
-      Tone.Transport.bpm.value = parseFloat(e.target.value);
+    setupKnob(document.getElementById('knobFilter'), {
+      min: 200, max: 4000, initial: 900,
+      valueId: 'knobFilterValue',
+      format: v => String(Math.round(v)) + 'hz',
+      onChange: v => { if (filterNode) filterNode.frequency.value = v; },
     });
 
-    document.getElementById('filterSlider').addEventListener('input', e => {
-      if (filterNode) filterNode.frequency.value = parseFloat(e.target.value);
+    setupKnob(document.getElementById('knobDelay'), {
+      min: 0, max: 0.7, initial: 0.25,
+      valueId: 'knobDelayValue',
+      format: v => String(Math.round((v / 0.7) * 100)) + '%',
+      onChange: v => { if (delayNode) delayNode.wet.value = v; },
     });
 
-    document.getElementById('delaySlider').addEventListener('input', e => {
-      if (delayNode) delayNode.wet.value = parseFloat(e.target.value);
-    });
-
+    // ── Mutar patrón
     document.getElementById('mutateBtn').addEventListener('click', () => {
       ['hat', 'perc'].forEach(track => {
         for (let i = 0; i < NUM_STEPS; i++) {
@@ -987,7 +1208,7 @@
     }, { passive: true });
 
     floatMute.addEventListener('click', () => {
-      if (!toneStarted) return;
+      if (!contextStarted) return;
       muted = !muted;
       Tone.Destination.mute = muted;
       floatMute.textContent = muted ? 'Reanudar' : 'Silenciar';
