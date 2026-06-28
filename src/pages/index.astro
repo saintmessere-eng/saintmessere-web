@@ -1,9 +1,10 @@
 ---
-// Saint Messere — index.astro — secuenciador con carácter de plugin + sitio inmersivo
+// Saint Messere — index.astro — raíz/vid de scroll + secuenciador de 7 pistas
 ---
 <html lang="es">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <title>Saint Messere</title>
   <style>
@@ -88,13 +89,34 @@
       background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
     }
 
-    /* ── World — responde al mouse (NO incluye la recepción) ── */
+    /* ── World — ya no recibe tilt de mouse, solo contiene la narrativa ── */
     #world {
       position: relative;
       z-index: 1;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease;
-      will-change: transform;
+    }
+
+    /* ── Raíz / vid — conecta las secciones, fluye con el scroll ── */
+    .root-vine {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    #rootVinePath {
+      fill: none;
+      stroke: rgba(200,185,122,0.16);
+      stroke-width: 1.4;
+    }
+    .vine-node {
+      fill: none;
+      stroke: rgba(200,185,122,0.35);
+      stroke-width: 1.4;
+    }
+    #rootVineDot {
+      fill: var(--gold-solid);
+      filter: drop-shadow(0 0 6px rgba(200,185,122,0.85)) drop-shadow(0 0 14px rgba(200,185,122,0.4));
     }
 
     /* ── Sections ── */
@@ -107,9 +129,10 @@
       position: relative;
       overflow: hidden;
       transform-style: preserve-3d;
+      z-index: 1;
     }
 
-    /* ── Capas de profundidad ── */
+    /* ── Capas de profundidad (entrada por scroll, no por mouse) ── */
     .depth-far {
       position: absolute;
       pointer-events: none;
@@ -171,12 +194,12 @@
     }
 
     /* ═══════════════════════════════════════════
-       RECEPTION — secuenciador con carácter de plugin (fuera de #world)
+       RECEPTION — secuenciador (fuera de #world)
        ═══════════════════════════════════════════ */
     .reception {
       flex-direction: column;
-      gap: 36px;
-      background: var(--bg);
+      gap: 32px;
+      background: radial-gradient(circle at 50% 35%, #100e0a 0%, var(--bg) 70%);
       z-index: 3;
     }
     .reception-eyebrow {
@@ -186,354 +209,309 @@
       text-transform: uppercase;
     }
 
-    /* ── Panel — chasis del plugin ── */
     .panel {
       position: relative;
       width: 100%;
-      max-width: 880px;
-      background: linear-gradient(160deg, #1c1c1c, #0a0a0a 65%);
-      border-radius: 16px;
-      padding: 26px 30px 30px;
-      border: 1px solid rgba(0,0,0,0.75);
+      max-width: 900px;
+      background: linear-gradient(165deg, #3c372e 0%, #221f1a 38%, #0d0c0a 100%);
+      border-radius: 18px;
+      padding: 24px 28px 28px;
+      border: 1px solid #050504;
       box-shadow:
-        0 26px 64px rgba(0,0,0,0.65),
-        inset 0 1px 0 rgba(255,255,255,0.07),
-        inset 0 -1px 0 rgba(0,0,0,0.6);
+        0 30px 70px rgba(0,0,0,0.65),
+        inset 0 2px 0 rgba(255,255,255,0.06),
+        inset 0 -2px 0 rgba(0,0,0,0.5);
     }
-    .panel::before {
-      content: '';
+    .panel-sheen {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 42%;
+      border-radius: 18px 18px 60% 60% / 18px 18px 30% 30%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.09), transparent);
+      pointer-events: none;
+    }
+    .brushed {
       position: absolute;
       inset: 0;
-      border-radius: 16px;
+      border-radius: 18px;
       pointer-events: none;
-      background-image: repeating-linear-gradient(98deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
-    }
-    .panel::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 16px;
-      pointer-events: none;
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 38%);
+      background-image:
+        repeating-linear-gradient(95deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, transparent 1px, transparent 4px),
+        repeating-linear-gradient(95deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 2px, transparent 2px, transparent 6px);
     }
     .screw {
       position: absolute;
-      width: 9px; height: 9px;
+      width: 10px; height: 10px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #5c5c5c, #0d0d0d 72%);
-      box-shadow: inset 0 0 2px rgba(0,0,0,0.85), 0 1px 1px rgba(255,255,255,0.06);
-      z-index: 2;
+      background: radial-gradient(circle at 32% 28%, #7a7a7a, #161616 72%);
+      box-shadow: inset 0 0 3px rgba(0,0,0,0.85), 0 1px 1px rgba(255,255,255,0.1);
+      z-index: 3;
     }
     .screw::after {
       content: '';
       position: absolute;
-      top: 50%; left: 14%;
-      width: 72%; height: 1px;
-      background: rgba(0,0,0,0.65);
-      transform: translateY(-50%) rotate(35deg);
+      top: 50%; left: 13%;
+      width: 74%; height: 1.2px;
+      background: rgba(0,0,0,0.7);
+      transform: translateY(-50%) rotate(36deg);
     }
-    .screw.tl { top: 12px; left: 12px; }
-    .screw.tr { top: 12px; right: 12px; }
-    .screw.bl { bottom: 12px; left: 12px; }
-    .screw.br { bottom: 12px; right: 12px; }
+    .screw.tl { top: 13px; left: 13px; }
+    .screw.tr { top: 13px; right: 13px; }
+    .screw.bl { bottom: 13px; left: 13px; }
+    .screw.br { bottom: 13px; right: 13px; }
 
-    /* ── Barra de marca (estilo plugin) ── */
     .panel-header {
+      position: relative;
+      z-index: 2;
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 22px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      position: relative;
-      z-index: 1;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     .brand-mark {
-      width: 36px; height: 36px;
+      width: 38px; height: 38px;
       border-radius: 50%;
-      border: 1px solid rgba(200,185,122,0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: radial-gradient(circle at 32% 28%, #4a4338, #15120e 75%);
+      border: 1px solid rgba(200,185,122,0.5);
+      display: flex; align-items: center; justify-content: center;
       font-family: var(--mono);
-      font-size: 11px;
-      color: var(--gold-solid);
-      letter-spacing: 0.03em;
+      font-size: 12px;
+      color: #e8d9a8;
+      text-shadow: 0 0 6px rgba(232,217,168,0.6);
+      box-shadow: inset 0 0 10px rgba(200,185,122,0.25), 0 2px 4px rgba(0,0,0,0.5);
       flex-shrink: 0;
-      box-shadow: inset 0 0 8px rgba(200,185,122,0.18);
     }
     .brand-text { flex: 1; min-width: 0; }
-    .brand-title {
-      font-family: var(--serif);
-      font-size: 16px;
-      color: var(--ink);
-      line-height: 1.2;
-    }
+    .brand-title { font-family: var(--serif); font-size: 16px; color: #f0ece2; line-height: 1.2; }
     .brand-sub {
       font-family: var(--mono);
       font-size: 8px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.32);
+      color: rgba(232,228,220,0.35);
       margin-top: 3px;
     }
     .lcd {
+      background: linear-gradient(160deg, #1c2616, #0a0f08);
+      border: 1px solid #000;
+      border-radius: 5px;
+      padding: 8px 14px;
+      box-shadow: inset 0 3px 8px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.04);
+      position: relative;
+      overflow: hidden;
+      min-width: 150px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .lcd::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(180deg, rgba(0,0,0,0.35) 0px, rgba(0,0,0,0.35) 1px, transparent 1px, transparent 3px);
+      pointer-events: none;
+    }
+    .lcd-text {
+      position: relative;
       font-family: var(--mono);
       font-size: 10px;
-      letter-spacing: 0.1em;
-      color: #d8c98a;
-      text-shadow: 0 0 6px rgba(216,201,138,0.55);
-      background: #060606;
-      border: 1px solid rgba(0,0,0,0.85);
-      border-radius: 4px;
-      padding: 8px 14px;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.85);
-      min-width: 124px;
-      text-align: center;
-      flex-shrink: 0;
+      letter-spacing: 0.08em;
+      color: #b9f08a;
+      text-shadow: 0 0 8px rgba(185,240,138,0.85), 0 0 16px rgba(185,240,138,0.4);
       white-space: nowrap;
     }
 
-    /* ── Pantalla del secuenciador ── */
     .seq-screen {
-      background: #050505;
-      border-radius: 10px;
-      padding: 18px 16px;
-      box-shadow: inset 0 2px 10px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.04);
       position: relative;
-      z-index: 1;
+      z-index: 2;
+      background: linear-gradient(160deg, #0d0d0d, #020202);
+      border-radius: 12px;
+      padding: 16px 14px;
+      box-shadow: inset 0 4px 14px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.05);
+      max-height: 320px;
+      overflow-y: auto;
     }
-    .sequencer {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .track-row {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-    }
+    .sequencer { display: flex; flex-direction: column; gap: 9px; }
+    .track-row { display: flex; align-items: center; gap: 9px; }
     .track-label {
       font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.12em;
+      font-size: 9px;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.5);
-      width: 36px;
+      color: #d8d2c2;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.8);
+      width: 38px;
       flex-shrink: 0;
+    }
+    .track-mute {
+      width: 18px; height: 14px;
+      border-radius: 3px;
+      background: linear-gradient(150deg, #3a3a3a, #161616);
+      border: 1px solid rgba(0,0,0,0.6);
+      font-family: var(--mono);
+      font-size: 7px;
+      color: rgba(232,228,220,0.4);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .track-mute.muted {
+      background: linear-gradient(150deg, #5a2420, #2a0f0d);
+      color: #ffb3a6;
+      border-color: rgba(255,90,60,0.5);
+      box-shadow: 0 0 6px rgba(255,90,60,0.4);
     }
     .track-led {
       width: 6px; height: 6px;
       border-radius: 50%;
-      background: rgba(232,228,220,0.1);
-      box-shadow: inset 0 0 2px rgba(0,0,0,0.7);
+      background: radial-gradient(circle at 35% 30%, #3a1810, #150805 70%);
+      box-shadow: inset 0 0 2px rgba(0,0,0,0.8);
       flex-shrink: 0;
-      transition: background 0.05s, box-shadow 0.05s;
     }
     .track-led.lit {
-      background: #fff0c4;
-      box-shadow: 0 0 8px 3px rgba(255,221,140,0.9);
+      background: radial-gradient(circle at 35% 30%, #fff3d0, #ffb84d 70%);
+      box-shadow: 0 0 9px 3px rgba(255,184,77,0.9), 0 0 18px 6px rgba(255,184,77,0.45);
     }
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(16, 1fr);
-      gap: 5px;
-      flex: 1;
-    }
+    .steps { display: grid; grid-template-columns: repeat(16, 1fr); gap: 4px; flex: 1; }
     .step {
       aspect-ratio: 1;
       border-radius: 4px;
+      background: linear-gradient(150deg, #4a4a48 0%, #232220 45%, #0d0c0b 100%);
+      border: 1px solid rgba(0,0,0,0.6);
+      box-shadow:
+        inset 1px 1px 2px rgba(255,255,255,0.15),
+        inset -2px -2px 4px rgba(0,0,0,0.6);
       cursor: pointer;
-      background: linear-gradient(180deg, #2b2b2b, #161616);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow:
-        inset 0 2px 2px rgba(0,0,0,0.6),
-        inset 0 -1px 1px rgba(255,255,255,0.04);
-      transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
     }
-    .step.beat { border-left: 2px solid rgba(200,185,122,0.3); }
+    .step.beat { box-shadow:
+        inset 1px 1px 2px rgba(255,255,255,0.15),
+        inset -2px -2px 4px rgba(0,0,0,0.6),
+        inset 0 0 0 1px rgba(232,217,168,0.28); }
     .step.active {
-      background: linear-gradient(180deg, #f0d28c, #b8924f);
-      border-color: rgba(255,230,160,0.7);
+      background: linear-gradient(150deg, #ffe8a8 0%, #f0b248 45%, #a86a1e 100%);
+      border-color: rgba(255,225,150,0.7);
       box-shadow:
-        0 0 14px 3px rgba(216,190,120,0.65),
-        inset 0 1px 1px rgba(255,255,255,0.5),
-        inset 0 -2px 3px rgba(110,82,28,0.55);
+        0 0 14px 3px rgba(255,178,72,0.7),
+        0 0 28px 8px rgba(255,178,72,0.3),
+        inset 1px 1px 2px rgba(255,255,255,0.65),
+        inset -2px -2px 3px rgba(120,70,15,0.55);
     }
-    .step.playhead {
-      outline: 2px solid rgba(255,255,255,0.85);
-      outline-offset: 1px;
-      transform: scale(1.05);
-    }
+    .step.playhead { outline: 2px solid #fff; outline-offset: 1px; }
 
-    /* ── Franja de controles ── */
     .controls-screen {
+      position: relative;
+      z-index: 2;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 24px;
+      gap: 22px;
       flex-wrap: wrap;
-      margin-top: 20px;
-      background: rgba(255,255,255,0.015);
-      border-radius: 10px;
-      padding: 22px 24px;
-      box-shadow: inset 0 1px 5px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.03);
-      position: relative;
-      z-index: 1;
+      margin-top: 18px;
+      background: linear-gradient(160deg, #16140f, #0a0908);
+      border-radius: 12px;
+      padding: 18px 22px;
+      box-shadow: inset 0 3px 10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04);
     }
-    .knobs-row {
-      display: flex;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
+    .knobs-row { display: flex; gap: 28px; flex-wrap: wrap; }
 
-    /* ── Perilla real con anillo de valor ── */
     .knob {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       padding-top: 4px;
       cursor: grab;
       user-select: none;
       touch-action: none;
     }
     .knob:active { cursor: grabbing; }
-    .knob-ring {
-      position: absolute;
-      top: -4px;
-      left: 50%;
-      width: 64px;
-      height: 64px;
-      transform: translateX(-50%);
-      pointer-events: none;
+    .knob-ring { position: absolute; top: -4px; left: 50%; width: 60px; height: 60px; transform: translateX(-50%); pointer-events: none; }
+    .knob-ring-bg, .knob-ring-fg {
+      fill: none; stroke-width: 3; stroke-linecap: round;
+      transform: rotate(-225deg); transform-origin: 30px 30px;
     }
-    .knob-ring-bg,
-    .knob-ring-fg {
-      fill: none;
-      stroke-width: 3;
-      stroke-linecap: round;
-      transform: rotate(-225deg);
-      transform-origin: 32px 32px;
-    }
-    .knob-ring-bg {
-      stroke: rgba(255,255,255,0.08);
-      stroke-dasharray: 131.95 43.98;
-    }
-    .knob-ring-fg {
-      stroke: var(--gold-solid);
-      filter: drop-shadow(0 0 4px rgba(200,185,122,0.6));
-      stroke-dasharray: 0 175.93;
-    }
+    .knob-ring-bg { stroke: rgba(255,255,255,0.08); stroke-dasharray: 122.65 40.88; }
+    .knob-ring-fg { stroke: var(--gold-solid); filter: drop-shadow(0 0 4px rgba(200,185,122,0.6)); stroke-dasharray: 0 163.53; }
     .knob-body {
-      width: 58px; height: 58px;
+      width: 54px; height: 54px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 28%, #3c3c3c, #131313 72%);
-      border: 1px solid rgba(0,0,0,0.6);
+      background: radial-gradient(circle at 32% 26%, #6a6358 0%, #2c2820 45%, #0d0b08 100%);
+      border: 1px solid #050403;
       box-shadow:
-        0 3px 7px rgba(0,0,0,0.6),
-        inset 0 1px 1px rgba(255,255,255,0.09),
-        inset 0 -2px 4px rgba(0,0,0,0.65);
+        0 5px 10px rgba(0,0,0,0.65),
+        inset 2px 2px 3px rgba(255,255,255,0.22),
+        inset -3px -3px 5px rgba(0,0,0,0.7);
       position: relative;
       z-index: 1;
     }
+    .knob-body::before {
+      content: '';
+      position: absolute;
+      top: 18%; left: 22%;
+      width: 28%; height: 16%;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      filter: blur(2px);
+    }
     .knob-indicator {
       position: absolute;
-      bottom: 50%;
-      left: 50%;
-      width: 2px;
-      height: 20px;
-      margin-left: -1px;
-      background: var(--gold-solid);
-      box-shadow: 0 0 6px rgba(200,185,122,0.7);
-      border-radius: 1px;
+      bottom: 50%; left: 50%;
+      width: 3px; height: 19px;
+      margin-left: -1.5px;
+      background: linear-gradient(to top, #c8b97a, #fff3d0);
+      box-shadow: 0 0 7px rgba(232,217,168,0.8);
+      border-radius: 2px;
       transform-origin: 50% 100%;
-      transform: rotate(0deg);
     }
-    .knob-label {
-      font-family: var(--mono);
-      font-size: 8px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: rgba(232,228,220,0.45);
-    }
-    .knob-value {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--gold-solid);
-      text-shadow: 0 0 5px rgba(200,185,122,0.35);
-      min-width: 44px;
-      text-align: center;
-    }
+    .knob-label { font-family: var(--mono); font-size: 8px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(232,228,220,0.5); }
+    .knob-value { font-family: var(--mono); font-size: 10px; color: #e8d9a8; text-shadow: 0 0 5px rgba(232,217,168,0.4); min-width: 44px; text-align: center; }
 
-    /* ── Power ── */
-    .power-unit {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 9px;
-    }
+    .power-unit { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .power-btn {
-      width: 56px; height: 56px;
+      width: 54px; height: 54px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 28%, #2c2c2c, #0a0a0a 75%);
-      border: 2px solid rgba(0,0,0,0.7);
+      background: radial-gradient(circle at 32% 26%, #4a4642 0%, #18160f 75%);
+      border: 2px solid #020201;
       box-shadow:
-        0 3px 8px rgba(0,0,0,0.6),
-        inset 0 1px 2px rgba(255,255,255,0.09),
-        inset 0 -2px 4px rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+        0 5px 10px rgba(0,0,0,0.65),
+        inset 2px 2px 3px rgba(255,255,255,0.16),
+        inset -3px -3px 5px rgba(0,0,0,0.75);
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer;
-      transition: transform 0.15s;
     }
-    .power-btn:active { transform: scale(0.94); }
     .power-led {
       width: 9px; height: 9px;
       border-radius: 50%;
-      background: rgba(200,60,40,0.45);
-      box-shadow: inset 0 0 2px rgba(0,0,0,0.5);
-      transition: background 0.3s, box-shadow 0.3s;
+      background: radial-gradient(circle at 35% 30%, #4a1810, #1a0805 70%);
+      box-shadow: inset 0 0 3px rgba(0,0,0,0.6);
     }
     .power-btn.on .power-led {
-      background: #ff5a3c;
-      box-shadow: 0 0 9px 3px rgba(255,90,60,0.75), 0 0 20px 6px rgba(255,90,60,0.35);
+      background: radial-gradient(circle at 35% 30%, #ffb39e, #ff4422 70%);
+      box-shadow: 0 0 11px 4px rgba(255,68,34,0.8), 0 0 24px 8px rgba(255,68,34,0.38);
     }
-    .power-label {
-      font-family: var(--mono);
-      font-size: 8px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: rgba(232,228,220,0.4);
-    }
+    .power-label { font-family: var(--mono); font-size: 8px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(232,228,220,0.45); }
 
-    /* ── Botón hardware genérico (mutar) ── */
     .hw-button {
       font-family: var(--mono);
       font-size: 9px;
-      letter-spacing: 0.22em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: rgba(232,228,220,0.55);
-      background: linear-gradient(180deg, #262626, #101010);
-      border: 1px solid rgba(0,0,0,0.7);
-      border-radius: 5px;
-      padding: 13px 22px;
-      cursor: pointer;
+      color: #d8d2c2;
+      background: linear-gradient(150deg, #3a382f, #161410);
+      border: 1px solid #050403;
+      border-radius: 6px;
+      padding: 13px 20px;
       box-shadow:
-        inset 0 1px 1px rgba(255,255,255,0.07),
-        inset 0 -2px 3px rgba(0,0,0,0.6),
-        0 1px 0 rgba(255,255,255,0.03);
-      transition: color 0.2s, transform 0.1s, box-shadow 0.15s;
+        inset 1px 1px 2px rgba(255,255,255,0.14),
+        inset -2px -2px 4px rgba(0,0,0,0.55),
+        0 2px 4px rgba(0,0,0,0.4);
+      cursor: pointer;
     }
     .hw-button:hover { color: var(--gold-solid); }
-    .hw-button:active {
-      transform: translateY(1px);
-      box-shadow: inset 0 2px 3px rgba(0,0,0,0.7);
-    }
 
-    /* ── Mute flotante ── */
     .float-mute {
       position: fixed;
       bottom: 28px;
@@ -557,67 +535,21 @@
     .float-mute:hover { color: var(--gold-solid); border-color: rgba(200,185,122,0.5); }
 
     /* ── HERO ── */
-    .hero {
-      flex-direction: column;
-      text-align: center;
-      background: var(--bg);
-      perspective: 800px;
-    }
-
-    .hero-eyebrow {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      margin-bottom: 48px;
-    }
-    .hero-name {
-      font-size: clamp(64px, 13vw, 148px);
-      font-weight: 400;
-      line-height: 0.88;
-      letter-spacing: -0.02em;
-      transform-style: preserve-3d;
-    }
-    .hero-name .light {
-      color: rgba(232,228,220,0.12);
-      font-style: italic;
-      display: block;
-      transform: translateZ(-20px);
-    }
-    .hero-name .bold {
-      display: block;
-      transform: translateZ(20px);
-    }
-    .hero-sub {
-      margin-top: 48px;
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.25em;
-    }
+    .hero { flex-direction: column; text-align: center; background: var(--bg); perspective: 800px; }
+    .hero-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; margin-bottom: 48px; }
+    .hero-name { font-size: clamp(64px, 13vw, 148px); font-weight: 400; line-height: 0.88; letter-spacing: -0.02em; transform-style: preserve-3d; }
+    .hero-name .light { color: rgba(232,228,220,0.12); font-style: italic; display: block; transform: translateZ(-20px); }
+    .hero-name .bold { display: block; transform: translateZ(20px); }
+    .hero-sub { margin-top: 48px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em; }
 
     .scroll-hint {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      opacity: 0;
-      animation: fadeIn 1s ease 1.4s forwards;
+      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      opacity: 0; animation: fadeIn 1s ease 1.4s forwards;
     }
-    .scroll-hint span {
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 0.35em;
-      color: rgba(232,228,220,0.18);
-      text-transform: uppercase;
-    }
+    .scroll-hint span { font-family: var(--mono); font-size: 9px; letter-spacing: 0.35em; color: rgba(232,228,220,0.18); text-transform: uppercase; }
     .scroll-hint::after {
-      content: '';
-      width: 1px;
-      height: 56px;
+      content: ''; width: 1px; height: 56px;
       background: linear-gradient(to bottom, rgba(232,228,220,0.2), transparent);
       animation: scrollPulse 2.4s ease infinite;
     }
@@ -632,14 +564,7 @@
     /* ── MANIFESTO ── */
     .manifesto { background: var(--bg-alt); flex-direction: column; }
     .manifesto-wrap { max-width: 640px; width: 100%; }
-    .m-line {
-      font-size: clamp(26px, 4vw, 46px);
-      font-weight: 400;
-      line-height: 1.15;
-      padding-bottom: 18px;
-      margin-bottom: 18px;
-      border-bottom: 1px solid var(--ink-ghost);
-    }
+    .m-line { font-size: clamp(26px, 4vw, 46px); font-weight: 400; line-height: 1.15; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--ink-ghost); }
     .m-line:last-child { border-bottom: none; }
     .m-em   { color: var(--ink); }
     .m-dim  { color: rgba(232,228,220,0.2); }
@@ -648,116 +573,57 @@
 
     /* ── PILLARS ── */
     .pillars { background: var(--bg); flex-direction: column; gap: 72px; }
-    .pillars-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.45em;
-      text-transform: uppercase;
-    }
-    .pillars-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: rgba(232,228,220,0.06);
-      width: 100%;
-      max-width: 900px;
-    }
-    .pillar {
-      background: var(--bg);
-      padding: 48px 32px;
-      transition: background 0.4s ease, transform 0.4s ease;
-      transform-style: preserve-3d;
-    }
-    .pillar:hover {
-      background: #0f0f0f;
-      transform: translateZ(12px);
-    }
-    .pillar-num {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      margin-bottom: 24px;
-    }
+    .pillars-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.45em; text-transform: uppercase; }
+    .pillars-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(232,228,220,0.06); width: 100%; max-width: 900px; }
+    .pillar { background: var(--bg); padding: 48px 32px; transition: background 0.4s ease, transform 0.4s ease; transform-style: preserve-3d; }
+    .pillar:hover { background: #0f0f0f; transform: translateZ(12px); }
+    .pillar-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; margin-bottom: 24px; }
     .pillar h3 { font-size: 22px; font-weight: 400; margin-bottom: 18px; line-height: 1.2; }
-    .pillar p {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: rgba(232,228,220,0.32);
-      line-height: 1.9;
-      letter-spacing: 0.04em;
-    }
+    .pillar p { font-family: var(--mono); font-size: 11px; color: rgba(232,228,220,0.32); line-height: 1.9; letter-spacing: 0.04em; }
 
     /* ── TEATRO ── */
     .teatro { background: var(--bg-alt); flex-direction: column; text-align: center; gap: 64px; }
-    .teatro h2 {
-      font-size: clamp(38px, 7vw, 84px);
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      line-height: 1.05;
-    }
+    .teatro h2 { font-size: clamp(38px, 7vw, 84px); font-weight: 400; letter-spacing: -0.02em; line-height: 1.05; }
     .teatro h2 em { font-style: italic; color: rgba(232,228,220,0.22); }
     .acts { display: flex; align-items: center; gap: 48px; }
     .act { display: flex; flex-direction: column; align-items: center; gap: 14px; }
     .act-symbol { font-size: 28px; opacity: 0.45; line-height: 1; transition: opacity 0.4s, transform 0.4s; }
     .act:hover .act-symbol { opacity: 0.9; transform: translateZ(20px) scale(1.1); }
-    .act-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-    }
+    .act-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; }
     .act-sep { font-size: 16px; color: rgba(232,228,220,0.08); padding-bottom: 20px; }
 
     /* ── CIERRE ── */
     .cierre { background: var(--bg); flex-direction: column; text-align: center; gap: 36px; }
-    .cierre-quote {
-      font-size: clamp(17px, 2.8vw, 30px);
-      font-style: italic;
-      color: rgba(232,228,220,0.45);
-      max-width: 560px;
-      line-height: 1.6;
-    }
+    .cierre-quote { font-size: clamp(17px, 2.8vw, 30px); font-style: italic; color: rgba(232,228,220,0.45); max-width: 560px; line-height: 1.6; }
     .cierre-quote strong { color: var(--ink); font-weight: 400; }
-    .cierre-sig {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.3em;
-    }
-    .cierre-links {
-      display: flex;
-      gap: 48px;
-      justify-content: center;
-      margin-top: 16px;
-    }
+    .cierre-sig { font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; }
+    .cierre-links { display: flex; gap: 48px; justify-content: center; margin-top: 16px; }
     .cierre-link {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: rgba(200,185,122,0.45);
-      text-decoration: none;
-      padding-bottom: 4px;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: rgba(200,185,122,0.45); text-decoration: none; padding-bottom: 4px;
       border-bottom: 1px solid rgba(200,185,122,0.15);
       transition: color 0.3s, border-color 0.3s, transform 0.3s, text-shadow 0.3s;
       display: inline-block;
     }
     .cierre-link:hover {
-      color: var(--gold-solid);
-      border-color: rgba(200,185,122,0.6);
+      color: var(--gold-solid); border-color: rgba(200,185,122,0.6);
       text-shadow: 0 0 10px rgba(200,185,122,0.6), 0 0 22px rgba(200,185,122,0.3);
       transform: translateY(-2px);
     }
 
     /* ── Responsive ── */
     @media (max-width: 760px) {
-      section { padding: 60px 24px; }
-      .panel { padding: 20px 16px 22px; }
+      section { padding: 60px 22px; }
+      .panel { padding: 18px 14px 20px; }
       .panel-header { flex-wrap: wrap; }
-      .lcd { min-width: 100%; order: 3; margin-top: 8px; }
-      .track-label { font-size: 9px; width: 28px; }
-      .steps { gap: 3px; }
-      .controls-screen { justify-content: center; gap: 22px; }
-      .knobs-row { gap: 22px; justify-content: center; }
+      .lcd { min-width: 100%; order: 3; margin-top: 6px; }
+      .seq-screen { max-height: 280px; padding: 12px 10px; }
+      .sequencer { gap: 6px; }
+      .track-row { gap: 6px; }
+      .track-label { font-size: 8px; width: 26px; }
+      .steps { gap: 2px; }
+      .controls-screen { justify-content: center; gap: 18px; padding: 16px; }
+      .knobs-row { gap: 18px; justify-content: center; }
 
       .pillars-grid { grid-template-columns: 1fr; }
       .acts { flex-direction: column; gap: 28px; }
@@ -785,11 +651,13 @@
   <div class="cursor-ring" id="cursorRing"></div>
   <button class="float-mute" id="floatMute">Silenciar</button>
 
-  <!-- ── RECEPTION — fuera de #world: no recibe el tilt 3D ── -->
+  <!-- ── RECEPTION — secuenciador, fuera de #world ── -->
   <section class="reception" id="reception">
     <p class="reception-eyebrow glow">El ritual de entrada</p>
 
     <div class="panel">
+      <div class="panel-sheen"></div>
+      <div class="brushed"></div>
       <div class="screw tl"></div>
       <div class="screw tr"></div>
       <div class="screw bl"></div>
@@ -801,7 +669,7 @@
           <div class="brand-title">Saint Messere</div>
           <div class="brand-sub">Ritual Sequencer</div>
         </div>
-        <div class="lcd" id="lcd">STANDBY</div>
+        <div class="lcd"><div class="lcd-text" id="lcdText">STANDBY</div></div>
       </div>
 
       <div class="seq-screen">
@@ -818,27 +686,27 @@
 
         <div class="knobs-row">
           <div class="knob" id="knobTempo">
-            <svg class="knob-ring" viewBox="0 0 64 64">
-              <circle class="knob-ring-bg" cx="32" cy="32" r="28"></circle>
-              <circle class="knob-ring-fg" cx="32" cy="32" r="28"></circle>
+            <svg class="knob-ring" viewBox="0 0 60 60">
+              <circle class="knob-ring-bg" cx="30" cy="30" r="26"></circle>
+              <circle class="knob-ring-fg" cx="30" cy="30" r="26"></circle>
             </svg>
             <div class="knob-body"><div class="knob-indicator"></div></div>
             <div class="knob-label">Tempo</div>
             <div class="knob-value" id="knobTempoValue">122</div>
           </div>
           <div class="knob" id="knobFilter">
-            <svg class="knob-ring" viewBox="0 0 64 64">
-              <circle class="knob-ring-bg" cx="32" cy="32" r="28"></circle>
-              <circle class="knob-ring-fg" cx="32" cy="32" r="28"></circle>
+            <svg class="knob-ring" viewBox="0 0 60 60">
+              <circle class="knob-ring-bg" cx="30" cy="30" r="26"></circle>
+              <circle class="knob-ring-fg" cx="30" cy="30" r="26"></circle>
             </svg>
             <div class="knob-body"><div class="knob-indicator"></div></div>
             <div class="knob-label">Filtro</div>
             <div class="knob-value" id="knobFilterValue">900</div>
           </div>
           <div class="knob" id="knobDelay">
-            <svg class="knob-ring" viewBox="0 0 64 64">
-              <circle class="knob-ring-bg" cx="32" cy="32" r="28"></circle>
-              <circle class="knob-ring-fg" cx="32" cy="32" r="28"></circle>
+            <svg class="knob-ring" viewBox="0 0 60 60">
+              <circle class="knob-ring-bg" cx="30" cy="30" r="26"></circle>
+              <circle class="knob-ring-fg" cx="30" cy="30" r="26"></circle>
             </svg>
             <div class="knob-body"><div class="knob-indicator"></div></div>
             <div class="knob-label">Eco</div>
@@ -854,10 +722,13 @@
   </section>
 
   <div id="world">
+    <svg class="root-vine" id="rootVine" preserveAspectRatio="none">
+      <path id="rootVinePath"></path>
+      <circle id="rootVineDot" r="5"></circle>
+    </svg>
 
     <!-- ── HERO ── -->
     <section class="hero">
-
       <div class="depth-far ghost" style="font-size:clamp(200px,36vw,420px);top:-15%;right:-8%;opacity:0.03;">S</div>
       <div class="depth-mid ghost" style="font-size:clamp(140px,24vw,280px);bottom:-18%;left:-8%;opacity:0.04;">M</div>
       <div class="horizon" style="top:30%;"></div>
@@ -970,36 +841,7 @@
       requestAnimationFrame(animRing);
     })();
 
-    // ── Mouse parallax 3D — SOLO afecta a #world (la recepción queda fuera, fija)
     const world = document.getElementById('world');
-    const W = window.innerWidth, H = window.innerHeight;
-    let tx = 0, ty = 0, cx = 0, cy = 0;
-
-    document.addEventListener('mousemove', e => {
-      tx = ((e.clientX / W) - 0.5) * 6;
-      ty = ((e.clientY / H) - 0.5) * -4;
-    });
-
-    (function tiltLoop() {
-      cx += (tx - cx) * 0.06;
-      cy += (ty - cy) * 0.06;
-      world.style.transform = `perspective(1200px) rotateY(${cx}deg) rotateX(${cy}deg)`;
-      requestAnimationFrame(tiltLoop);
-    })();
-
-    // ── Scroll parallax en capas de profundidad
-    const farLayers = document.querySelectorAll('.depth-far');
-    const midLayers = document.querySelectorAll('.depth-mid');
-
-    window.addEventListener('scroll', () => {
-      const sy = window.scrollY;
-      farLayers.forEach(el => {
-        el.style.transform = `translateZ(-120px) scale(1.15) translateY(${sy * 0.18}px)`;
-      });
-      midLayers.forEach(el => {
-        el.style.transform = `translateZ(-60px) scale(1.07) translateY(${sy * 0.08}px)`;
-      });
-    }, { passive: true });
 
     // ── Partículas flotantes
     const canvas = document.getElementById('particles');
@@ -1055,23 +897,88 @@
     }, { threshold: 0.1 });
     reveals.forEach(el => obs.observe(el));
 
-    // Hero reveal on load
     document.querySelectorAll('.hero [data-reveal]').forEach((el, i) => {
       setTimeout(() => el.classList.add('visible'), 400 + i * 200);
     });
 
     // ════════════════════════════════════════════════
-    // ── SECUENCIADOR — carácter de plugin ──
+    // ── RAÍZ / VID — conecta secciones, fluye con scroll ──
+    // ════════════════════════════════════════════════
+    const vineSvg = document.getElementById('rootVine');
+    const vinePathEl = document.getElementById('rootVinePath');
+    const vineDot = document.getElementById('rootVineDot');
+    let vineLength = 0;
+
+    function buildVine() {
+      const worldWidth = world.offsetWidth;
+      const worldHeight = world.offsetHeight;
+      const sections = Array.from(world.querySelectorAll('section'));
+      const centerX = worldWidth / 2;
+      const wiggle = Math.min(60, worldWidth * 0.045);
+
+      const points = sections.map((sec, i) => ({
+        x: centerX + (i % 2 === 0 ? -wiggle : wiggle),
+        y: sec.offsetTop + sec.offsetHeight / 2,
+      }));
+
+      vineSvg.setAttribute('viewBox', '0 0 ' + worldWidth + ' ' + worldHeight);
+      vineSvg.setAttribute('width', worldWidth);
+      vineSvg.setAttribute('height', worldHeight);
+
+      let d = 'M ' + points[0].x + ' ' + points[0].y;
+      for (let i = 1; i < points.length; i++) {
+        const prev = points[i - 1];
+        const curr = points[i];
+        const midY = (prev.y + curr.y) / 2;
+        d += ' C ' + prev.x + ' ' + midY + ', ' + curr.x + ' ' + midY + ', ' + curr.x + ' ' + curr.y;
+      }
+      vinePathEl.setAttribute('d', d);
+
+      vineSvg.querySelectorAll('.vine-node').forEach(n => n.remove());
+      points.forEach(p => {
+        const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('cx', String(p.x));
+        c.setAttribute('cy', String(p.y));
+        c.setAttribute('r', '7');
+        c.setAttribute('class', 'vine-node');
+        vineSvg.appendChild(c);
+      });
+
+      vineLength = vinePathEl.getTotalLength();
+    }
+
+    function updateVineDot() {
+      const worldTop = world.offsetTop;
+      const worldHeight = world.offsetHeight;
+      let frac = (window.scrollY - worldTop + window.innerHeight / 2) / worldHeight;
+      frac = Math.max(0, Math.min(1, frac));
+      const pt = vinePathEl.getPointAtLength(frac * vineLength);
+      vineDot.setAttribute('cx', String(pt.x));
+      vineDot.setAttribute('cy', String(pt.y));
+    }
+
+    window.addEventListener('load', () => { buildVine(); updateVineDot(); });
+    window.addEventListener('resize', () => { buildVine(); updateVineDot(); });
+    window.addEventListener('scroll', updateVineDot, { passive: true });
+    setTimeout(() => { buildVine(); updateVineDot(); }, 200);
+
+    // ════════════════════════════════════════════════
+    // ── SECUENCIADOR — 7 pistas con mute ──
     // ════════════════════════════════════════════════
     const NUM_STEPS = 16;
     const pattern = {
-      kick: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
-      hat:  [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0],
-      perc: [0,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,0,1],
-      bass: [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0],
+      kickA:  [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0],
+      kickB:  [0,0,0,0, 0,0,1,0, 0,0,0,0, 0,0,1,0],
+      hat:    [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0],
+      perc:   [0,0,0,0, 0,0,0,1, 0,0,0,0, 0,0,0,1],
+      bass:   [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0],
+      tribal: [0,0,1,0, 0,1,0,0, 0,0,1,0, 0,1,0,0],
+      birds:  [0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,1],
     };
-    const TRACKS = ['kick', 'hat', 'perc', 'bass'];
-    const TRACK_LABELS = { kick: 'Kick', hat: 'Hat', perc: 'Perc', bass: 'Bass' };
+    const TRACKS = ['kickA', 'kickB', 'hat', 'perc', 'bass', 'tribal', 'birds'];
+    const TRACK_LABELS = { kickA: 'Kick A', kickB: 'Kick B', hat: 'Hat', perc: 'Perc', bass: 'Bass', tribal: 'Tribal', birds: 'Birds' };
+    const mutes = {};
+    TRACKS.forEach(t => { mutes[t] = false; });
 
     const seqEl = document.getElementById('sequencer');
     TRACKS.forEach(track => {
@@ -1082,6 +989,15 @@
       label.className = 'track-label';
       label.textContent = TRACK_LABELS[track];
       row.appendChild(label);
+
+      const muteBtn = document.createElement('div');
+      muteBtn.className = 'track-mute';
+      muteBtn.textContent = 'M';
+      muteBtn.addEventListener('click', () => {
+        mutes[track] = !mutes[track];
+        muteBtn.classList.toggle('muted', mutes[track]);
+      });
+      row.appendChild(muteBtn);
 
       const led = document.createElement('div');
       led.className = 'track-led';
@@ -1114,14 +1030,14 @@
       setTimeout(() => led.classList.remove('lit'), 90);
     }
 
-    const lcd = document.getElementById('lcd');
+    const lcdText = document.getElementById('lcdText');
     let currentBpm = 122;
 
     function updateLcd(step) {
       const stepText = (typeof step === 'number')
         ? 'STEP ' + String(step + 1).padStart(2, '0') + '/16'
         : 'STEP --/16';
-      lcd.textContent = Math.round(currentBpm) + ' BPM · ' + stepText;
+      lcdText.textContent = Math.round(currentBpm) + ' BPM · ' + stepText;
     }
 
     function updatePlayhead(step) {
@@ -1133,20 +1049,25 @@
 
     let contextStarted = false;
     let isPlaying = false;
-    let filterNode, delayNode, kickSynth, hatSynth, percSynth, bassSynth, seq;
+    let filterNode, delayNode, seq;
+    let kickASynth, kickBSynth, hatSynth, percSynth, bassSynth, tribalSynth, birdSynth;
+    const birdNotes = ['C7', 'D7', 'E7', 'G7', 'A7'];
 
     function buildAudio() {
       filterNode = new Tone.Filter(900, 'lowpass');
       delayNode = new Tone.FeedbackDelay('8n', 0.3);
       delayNode.wet.value = 0.25;
-
       filterNode.connect(delayNode);
       delayNode.toDestination();
 
-      kickSynth = new Tone.MembraneSynth({
-        pitchDecay: 0.05,
-        octaves: 6,
+      kickASynth = new Tone.MembraneSynth({
+        pitchDecay: 0.05, octaves: 6,
         envelope: { attack: 0.001, decay: 0.35, sustain: 0 },
+      }).toDestination();
+
+      kickBSynth = new Tone.MembraneSynth({
+        pitchDecay: 0.02, octaves: 4,
+        envelope: { attack: 0.001, decay: 0.18, sustain: 0 },
       }).toDestination();
 
       hatSynth = new Tone.NoiseSynth({
@@ -1157,10 +1078,7 @@
       percSynth = new Tone.MetalSynth({
         frequency: 220,
         envelope: { attack: 0.001, decay: 0.15, release: 0.05 },
-        harmonicity: 5.1,
-        modulationIndex: 16,
-        resonance: 3000,
-        octaves: 1.2,
+        harmonicity: 5.1, modulationIndex: 16, resonance: 3000, octaves: 1.2,
       }).connect(filterNode);
 
       bassSynth = new Tone.Synth({
@@ -1168,33 +1086,56 @@
         envelope: { attack: 0.02, decay: 0.3, sustain: 0.15, release: 0.5 },
       }).connect(filterNode);
 
+      tribalSynth = new Tone.PluckSynth({
+        attackNoise: 1, dampening: 1800, resonance: 0.85,
+      }).connect(filterNode);
+
+      birdSynth = new Tone.Synth({
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.005, decay: 0.12, sustain: 0, release: 0.05 },
+        portamento: 0.03,
+      }).connect(filterNode);
+
       Tone.Transport.bpm.value = currentBpm;
 
       seq = new Tone.Sequence((time, step) => {
-        if (pattern.kick[step]) {
-          kickSynth.triggerAttackRelease('C1', '8n', time);
-          Tone.Draw.schedule(() => flashLed('kick'), time);
+        if (pattern.kickA[step] && !mutes.kickA) {
+          kickASynth.triggerAttackRelease('C1', '8n', time);
+          Tone.Draw.schedule(() => flashLed('kickA'), time);
         }
-        if (pattern.hat[step]) {
+        if (pattern.kickB[step] && !mutes.kickB) {
+          kickBSynth.triggerAttackRelease('C2', '8n', time);
+          Tone.Draw.schedule(() => flashLed('kickB'), time);
+        }
+        if (pattern.hat[step] && !mutes.hat) {
           hatSynth.triggerAttackRelease('16n', time);
           Tone.Draw.schedule(() => flashLed('hat'), time);
         }
-        if (pattern.perc[step]) {
+        if (pattern.perc[step] && !mutes.perc) {
           percSynth.triggerAttackRelease('16n', time);
           Tone.Draw.schedule(() => flashLed('perc'), time);
         }
-        if (pattern.bass[step]) {
+        if (pattern.bass[step] && !mutes.bass) {
           bassSynth.triggerAttackRelease('D1', '4n', time);
           Tone.Draw.schedule(() => flashLed('bass'), time);
+        }
+        if (pattern.tribal[step] && !mutes.tribal) {
+          tribalSynth.triggerAttackRelease('G2', '16n', time);
+          Tone.Draw.schedule(() => flashLed('tribal'), time);
+        }
+        if (pattern.birds[step] && !mutes.birds) {
+          const note = birdNotes[Math.floor(Math.random() * birdNotes.length)];
+          birdSynth.triggerAttackRelease(note, '32n', time);
+          Tone.Draw.schedule(() => flashLed('birds'), time);
         }
         Tone.Draw.schedule(() => updatePlayhead(step), time);
       }, [...Array(NUM_STEPS).keys()], '16n');
     }
 
-    // ── Power button — primer clic arranca el contexto de audio (gesto requerido por el navegador)
     const powerBtn = document.getElementById('powerBtn');
 
-    powerBtn.addEventListener('click', async () => {
+    async function togglePower(e) {
+      if (e) e.preventDefault();
       if (!contextStarted) {
         await Tone.start();
         buildAudio();
@@ -1211,10 +1152,11 @@
         isPlaying = true;
         powerBtn.classList.add('on');
       }
-    });
+    }
+    powerBtn.addEventListener('touchend', togglePower);
+    powerBtn.addEventListener('click', togglePower);
 
-    // ── Perilla real con anillo de valor SVG
-    const RING_C = 2 * Math.PI * 28;
+    const RING_C = 2 * Math.PI * 26;
     const RING_TRACK = RING_C * 0.75;
 
     function setupKnob(el, opts) {
@@ -1242,11 +1184,7 @@
       let startY = 0;
       let startValue = 0;
 
-      function start(y) {
-        dragging = true;
-        startY = y;
-        startValue = value;
-      }
+      function start(y) { dragging = true; startY = y; startValue = value; }
       function move(y) {
         if (!dragging) return;
         const delta = startY - y;
@@ -1293,9 +1231,8 @@
       onChange: v => { if (delayNode) delayNode.wet.value = v; },
     });
 
-    // ── Mutar patrón
     document.getElementById('mutateBtn').addEventListener('click', () => {
-      ['hat', 'perc'].forEach(track => {
+      ['hat', 'perc', 'tribal'].forEach(track => {
         for (let i = 0; i < NUM_STEPS; i++) {
           if (Math.random() < 0.18) pattern[track][i] = pattern[track][i] ? 0 : 1;
         }
@@ -1307,7 +1244,6 @@
       });
     });
 
-    // ── Control flotante de silencio tras pasar la recepción
     const floatMute = document.getElementById('floatMute');
     const receptionSection = document.getElementById('reception');
     let muted = false;
