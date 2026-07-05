@@ -1,5 +1,5 @@
 ---
-// Saint Messere — index.astro — raíz interactiva + secuenciador 8 pistas (Solo/FX/Tono/Voice)
+// Saint Messere — index.astro
 ---
 <html lang="es">
 <head>
@@ -18,7 +18,6 @@
       --bg-alt: #0d0d0d;
       --mono: 'Courier New', monospace;
       --serif: 'Georgia', serif;
-      --gold: rgba(200,185,122,0.15);
       --gold-solid: #c8b97a;
     }
 
@@ -32,7 +31,7 @@
       cursor: none;
     }
 
-    /* ── Cursor ── */
+    /* ── Cursor global ── */
     .cursor {
       width: 6px; height: 6px;
       background: var(--ink);
@@ -53,68 +52,106 @@
       transform: translate(-50%, -50%);
       transition: width 0.3s, height 0.3s, border-color 0.3s, opacity 0.3s;
     }
-    body:has(a:hover) .cursor-ring,
-    body:has(button:hover) .cursor-ring,
-    body:has(.step:hover) .cursor-ring,
-    body:has(.knob:hover) .cursor-ring {
-      width: 56px; height: 56px;
-      border-color: rgba(232,228,220,0.5);
-    }
+    body:has(a:hover) .cursor-ring { width: 56px; height: 56px; border-color: rgba(232,228,220,0.5); }
 
-    /* ── Noise ── */
+    /* ── Cursor normal dentro del panel del secuenciador ── */
+    .panel, .panel * { cursor: auto !important; }
+    .step { cursor: pointer !important; }
+    .knob { cursor: grab !important; }
+    .knob:active { cursor: grabbing !important; }
+    .power-btn, .hw-button, .track-toggle { cursor: pointer !important; }
+
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 2;
-      opacity: 0.025;
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 2; opacity: 0.025;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
     .vignette { position: fixed; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%); }
 
-    #world { position: relative; z-index: 1; }
+    /* ── Notas musicales — columna vertebral ── */
+    .notes-column {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: visible;
+    }
 
-    /* ── Raíz / vid — interactiva ── */
-    .root-vine { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-    #rootVinePath { fill: none; stroke: rgba(200,185,122,0.16); stroke-width: 1.4; }
-    .vine-node { fill: none; stroke: rgba(200,185,122,0.35); stroke-width: 1.4; }
-    #rootVineDot {
-      fill: var(--gold-solid);
-      filter: drop-shadow(0 0 6px rgba(200,185,122,0.85)) drop-shadow(0 0 14px rgba(200,185,122,0.4));
+    .music-note {
+      position: absolute;
+      font-family: serif;
+      color: var(--gold-solid);
+      opacity: 0.12;
+      transform: translateX(-50%);
+      transition: opacity 0.8s ease, text-shadow 0.8s ease, transform 0.8s ease;
       pointer-events: all;
       cursor: pointer;
+      user-select: none;
+      line-height: 1;
     }
+
+    .music-note.awake {
+      opacity: 0.75;
+      text-shadow:
+        0 0 12px rgba(200,185,122,0.95),
+        0 0 28px rgba(200,185,122,0.65),
+        0 0 55px rgba(200,185,122,0.35);
+      transform: translateX(-50%) scale(1.18);
+    }
+
+    .music-note.near {
+      opacity: 0.9;
+      text-shadow:
+        0 0 16px rgba(200,185,122,1),
+        0 0 36px rgba(200,185,122,0.75),
+        0 0 70px rgba(200,185,122,0.45);
+      transform: translateX(-50%) scale(1.28);
+    }
+
+    /* ── Orbe viajero ── */
+    .orb {
+      position: absolute;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 32%, #fff8e8, #e8d488 55%, #c8a840 100%);
+      box-shadow:
+        0 0 16px 6px rgba(200,185,122,0.95),
+        0 0 40px 14px rgba(200,185,122,0.6),
+        0 0 80px 28px rgba(200,185,122,0.3);
+      pointer-events: all;
+      cursor: grab;
+      z-index: 5;
+      transform: translate(-50%, -50%);
+      transition: box-shadow 0.3s ease;
+    }
+    .orb:active { cursor: grabbing; }
+    .orb.excited {
+      box-shadow:
+        0 0 24px 10px rgba(200,185,122,1),
+        0 0 60px 22px rgba(200,185,122,0.75),
+        0 0 120px 44px rgba(200,185,122,0.45);
+    }
+
+    /* ── Susurro ── */
     .whisper {
       position: fixed;
       z-index: 60;
       font-family: var(--serif);
       font-style: italic;
-      font-size: 14px;
-      color: rgba(232,228,220,0.75);
-      text-shadow: 0 0 10px rgba(200,185,122,0.45);
+      font-size: 15px;
+      color: rgba(232,228,220,0.9);
+      text-shadow: 0 0 12px rgba(200,185,122,0.6), 0 0 28px rgba(200,185,122,0.35);
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.6s ease, transform 0.6s ease;
-      transform: translate(-50%, -130%);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      transform: translate(-50%, -140%);
       white-space: nowrap;
     }
-    .whisper.visible { opacity: 1; transform: translate(-50%, -155%); }
+    .whisper.visible { opacity: 1; transform: translate(-50%, -165%); }
 
-    section {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: 80px 60px; position: relative; overflow: hidden;
-      transform-style: preserve-3d; z-index: 1;
-    }
-
-    .depth-far { position: absolute; pointer-events: none; user-select: none; will-change: transform; transform: translateZ(-120px) scale(1.15); }
-    .depth-mid { position: absolute; pointer-events: none; user-select: none; will-change: transform; transform: translateZ(-60px) scale(1.07); }
-    .depth-near { position: relative; will-change: transform; transform: translateZ(0px); }
-    .ghost { font-family: var(--serif); font-style: italic; color: var(--ink-ghost); line-height: 1; }
-    .horizon { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(232,228,220,0.04), transparent); pointer-events: none; }
-
+    /* ── Reveal ── */
     [data-reveal] { opacity: 0; transition: opacity 1s ease, transform 1s ease; }
     [data-reveal="up"]    { transform: translateY(50px); }
     [data-reveal="left"]  { transform: translateX(-70px); }
@@ -133,6 +170,19 @@
       50%      { text-shadow: 0 0 10px rgba(200,185,122,0.65), 0 0 24px rgba(200,185,122,0.3); }
     }
 
+    /* ── Sections ── */
+    section {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 80px 60px; position: relative; overflow: hidden;
+      transform-style: preserve-3d; z-index: 1;
+    }
+
+    .depth-far { position: absolute; pointer-events: none; user-select: none; will-change: transform; transform: translateZ(-120px) scale(1.15); }
+    .depth-mid  { position: absolute; pointer-events: none; user-select: none; will-change: transform; transform: translateZ(-60px) scale(1.07); }
+    .depth-near { position: relative; will-change: transform; transform: translateZ(0px); }
+    .ghost { font-family: var(--serif); font-style: italic; color: var(--ink-ghost); line-height: 1; }
+    .horizon { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(232,228,220,0.04), transparent); pointer-events: none; }
+
     /* ═══ RECEPTION ═══ */
     .reception { flex-direction: column; gap: 32px; background: radial-gradient(circle at 50% 35%, #100e0a 0%, var(--bg) 70%); z-index: 3; }
     .reception-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; }
@@ -145,15 +195,11 @@
       box-shadow: 0 30px 70px rgba(0,0,0,0.65), inset 0 2px 0 rgba(255,255,255,0.06), inset 0 -2px 0 rgba(0,0,0,0.5);
     }
     .panel-sheen { position: absolute; top: 0; left: 0; right: 0; height: 42%; border-radius: 18px 18px 60% 60% / 18px 18px 30% 30%; background: linear-gradient(180deg, rgba(255,255,255,0.09), transparent); pointer-events: none; }
-    .brushed {
-      position: absolute; inset: 0; border-radius: 18px; pointer-events: none;
-      background-image:
-        repeating-linear-gradient(95deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, transparent 1px, transparent 4px),
-        repeating-linear-gradient(95deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 2px, transparent 2px, transparent 6px);
-    }
+    .brushed { position: absolute; inset: 0; border-radius: 18px; pointer-events: none; background-image: repeating-linear-gradient(95deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, transparent 1px, transparent 4px), repeating-linear-gradient(95deg, rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 2px, transparent 2px, transparent 6px); }
     .screw { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #7a7a7a, #161616 72%); box-shadow: inset 0 0 3px rgba(0,0,0,0.85), 0 1px 1px rgba(255,255,255,0.1); z-index: 3; }
     .screw::after { content: ''; position: absolute; top: 50%; left: 13%; width: 74%; height: 1.2px; background: rgba(0,0,0,0.7); transform: translateY(-50%) rotate(36deg); }
-    .screw.tl { top: 13px; left: 13px; } .screw.tr { top: 13px; right: 13px; } .screw.bl { bottom: 13px; left: 13px; } .screw.br { bottom: 13px; right: 13px; }
+    .screw.tl { top: 13px; left: 13px; } .screw.tr { top: 13px; right: 13px; }
+    .screw.bl { bottom: 13px; left: 13px; } .screw.br { bottom: 13px; right: 13px; }
 
     .panel-header { position: relative; z-index: 2; display: flex; align-items: center; gap: 14px; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .brand-mark { width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #4a4338, #15120e 75%); border: 1px solid rgba(200,185,122,0.5); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; color: #e8d9a8; text-shadow: 0 0 6px rgba(232,217,168,0.6); box-shadow: inset 0 0 10px rgba(200,185,122,0.25), 0 2px 4px rgba(0,0,0,0.5); flex-shrink: 0; }
@@ -169,101 +215,51 @@
     .track-row { display: flex; align-items: center; gap: 7px; }
     .track-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: #d8d2c2; text-shadow: 0 1px 1px rgba(0,0,0,0.8); width: 34px; flex-shrink: 0; }
     .track-toggles { display: flex; gap: 3px; flex-shrink: 0; }
-    .track-toggle {
-      width: 16px; height: 14px; border-radius: 3px;
-      background: linear-gradient(150deg, #3a3a3a, #161616);
-      border: 1px solid rgba(0,0,0,0.6);
-      font-family: var(--mono); font-size: 6.5px; color: rgba(232,228,220,0.4);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; user-select: none;
-    }
+    .track-toggle { width: 16px; height: 14px; border-radius: 3px; background: linear-gradient(150deg, #3a3a3a, #161616); border: 1px solid rgba(0,0,0,0.6); font-family: var(--mono); font-size: 6.5px; color: rgba(232,228,220,0.4); display: flex; align-items: center; justify-content: center; cursor: pointer !important; user-select: none; }
     .track-toggle.mute-active { background: linear-gradient(150deg, #5a2420, #2a0f0d); color: #ffb3a6; border-color: rgba(255,90,60,0.5); box-shadow: 0 0 6px rgba(255,90,60,0.4); }
-    .track-toggle.solo-active,
-    .track-toggle.fx-active,
-    .track-toggle.rev-active {
-      background: linear-gradient(150deg, #5a4420, #2a1f0d); color: #ffe9a6; border-color: rgba(255,221,140,0.5); box-shadow: 0 0 6px rgba(255,221,140,0.4);
-    }
+    .track-toggle.solo-active, .track-toggle.fx-active, .track-toggle.rev-active { background: linear-gradient(150deg, #5a4420, #2a1f0d); color: #ffe9a6; border-color: rgba(255,221,140,0.5); box-shadow: 0 0 6px rgba(255,221,140,0.4); }
     .track-led { width: 6px; height: 6px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #3a1810, #150805 70%); box-shadow: inset 0 0 2px rgba(0,0,0,0.8); flex-shrink: 0; }
     .track-led.lit { background: radial-gradient(circle at 35% 30%, #fff3d0, #ffb84d 70%); box-shadow: 0 0 9px 3px rgba(255,184,77,0.9), 0 0 18px 6px rgba(255,184,77,0.45); }
     .steps { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; flex: 1; }
-    .step {
-      aspect-ratio: 1; border-radius: 4px;
-      background: linear-gradient(150deg, #4a4a48 0%, #232220 45%, #0d0c0b 100%);
-      border: 1px solid rgba(0,0,0,0.6);
-      box-shadow: inset 1px 1px 2px rgba(255,255,255,0.15), inset -2px -2px 4px rgba(0,0,0,0.6);
-      cursor: pointer;
-    }
+    .step { aspect-ratio: 1; border-radius: 4px; background: linear-gradient(150deg, #4a4a48 0%, #232220 45%, #0d0c0b 100%); border: 1px solid rgba(0,0,0,0.6); box-shadow: inset 1px 1px 2px rgba(255,255,255,0.15), inset -2px -2px 4px rgba(0,0,0,0.6); cursor: pointer !important; }
     .step.beat { box-shadow: inset 1px 1px 2px rgba(255,255,255,0.15), inset -2px -2px 4px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(232,217,168,0.28); }
-    .step.active {
-      background: linear-gradient(150deg, #ffe8a8 0%, #f0b248 45%, #a86a1e 100%);
-      border-color: rgba(255,225,150,0.7);
-      box-shadow: 0 0 14px 3px rgba(255,178,72,0.7), 0 0 28px 8px rgba(255,178,72,0.3), inset 1px 1px 2px rgba(255,255,255,0.65), inset -2px -2px 3px rgba(120,70,15,0.55);
-    }
+    .step.active { background: linear-gradient(150deg, #ffe8a8 0%, #f0b248 45%, #a86a1e 100%); border-color: rgba(255,225,150,0.7); box-shadow: 0 0 14px 3px rgba(255,178,72,0.7), 0 0 28px 8px rgba(255,178,72,0.3), inset 1px 1px 2px rgba(255,255,255,0.65), inset -2px -2px 3px rgba(120,70,15,0.55); }
     .step.playhead { outline: 2px solid #fff; outline-offset: 1px; }
 
-    .controls-screen {
-      position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between;
-      gap: 20px; flex-wrap: wrap; margin-top: 18px;
-      background: linear-gradient(160deg, #16140f, #0a0908);
-      border-radius: 12px; padding: 18px 20px;
-      box-shadow: inset 0 3px 10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04);
-    }
+    .controls-screen { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-top: 18px; background: linear-gradient(160deg, #16140f, #0a0908); border-radius: 12px; padding: 18px 20px; box-shadow: inset 0 3px 10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04); }
     .knobs-row { display: flex; gap: 22px; flex-wrap: wrap; }
 
-    .knob { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 4px; cursor: grab; user-select: none; touch-action: none; }
-    .knob:active { cursor: grabbing; }
+    .knob { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 4px; cursor: grab !important; user-select: none; touch-action: none; }
+    .knob:active { cursor: grabbing !important; }
     .knob-ring { position: absolute; top: -4px; left: 50%; width: 56px; height: 56px; transform: translateX(-50%); pointer-events: none; }
     .knob-ring-bg, .knob-ring-fg { fill: none; stroke-width: 3; stroke-linecap: round; transform: rotate(-225deg); transform-origin: 28px 28px; }
     .knob-ring-bg { stroke: rgba(255,255,255,0.08); stroke-dasharray: 117.81 39.27; }
     .knob-ring-fg { stroke: var(--gold-solid); filter: drop-shadow(0 0 4px rgba(200,185,122,0.6)); stroke-dasharray: 0 157.08; }
-    .knob-body {
-      width: 50px; height: 50px; border-radius: 50%;
-      background: radial-gradient(circle at 32% 26%, #6a6358 0%, #2c2820 45%, #0d0b08 100%);
-      border: 1px solid #050403;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.65), inset 2px 2px 3px rgba(255,255,255,0.22), inset -3px -3px 5px rgba(0,0,0,0.7);
-      position: relative; z-index: 1;
-    }
+    .knob-body { width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle at 32% 26%, #6a6358 0%, #2c2820 45%, #0d0b08 100%); border: 1px solid #050403; box-shadow: 0 5px 10px rgba(0,0,0,0.65), inset 2px 2px 3px rgba(255,255,255,0.22), inset -3px -3px 5px rgba(0,0,0,0.7); position: relative; z-index: 1; }
     .knob-body::before { content: ''; position: absolute; top: 18%; left: 22%; width: 28%; height: 16%; border-radius: 50%; background: rgba(255,255,255,0.4); filter: blur(2px); }
     .knob-indicator { position: absolute; bottom: 50%; left: 50%; width: 3px; height: 17px; margin-left: -1.5px; background: linear-gradient(to top, #c8b97a, #fff3d0); box-shadow: 0 0 7px rgba(232,217,168,0.8); border-radius: 2px; transform-origin: 50% 100%; }
     .knob-label { font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(232,228,220,0.5); }
     .knob-value { font-family: var(--mono); font-size: 10px; color: #e8d9a8; text-shadow: 0 0 5px rgba(232,217,168,0.4); min-width: 40px; text-align: center; }
 
     .power-unit { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .power-btn {
-      width: 50px; height: 50px; border-radius: 50%;
-      background: radial-gradient(circle at 32% 26%, #4a4642 0%, #18160f 75%);
-      border: 2px solid #020201;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.65), inset 2px 2px 3px rgba(255,255,255,0.16), inset -3px -3px 5px rgba(0,0,0,0.75);
-      display: flex; align-items: center; justify-content: center; cursor: pointer;
-    }
+    .power-btn { width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle at 32% 26%, #4a4642 0%, #18160f 75%); border: 2px solid #020201; box-shadow: 0 5px 10px rgba(0,0,0,0.65), inset 2px 2px 3px rgba(255,255,255,0.16), inset -3px -3px 5px rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; cursor: pointer !important; }
     .power-led { width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #4a1810, #1a0805 70%); box-shadow: inset 0 0 3px rgba(0,0,0,0.6); }
     .power-btn.on .power-led { background: radial-gradient(circle at 35% 30%, #ffb39e, #ff4422 70%); box-shadow: 0 0 11px 4px rgba(255,68,34,0.8), 0 0 24px 8px rgba(255,68,34,0.38); }
     .power-label { font-family: var(--mono); font-size: 8px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(232,228,220,0.45); }
 
-    .hw-button {
-      font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
-      color: #d8d2c2; background: linear-gradient(150deg, #3a382f, #161410);
-      border: 1px solid #050403; border-radius: 6px; padding: 13px 18px; cursor: pointer;
-      box-shadow: inset 1px 1px 2px rgba(255,255,255,0.14), inset -2px -2px 4px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.4);
-    }
+    .hw-button { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #d8d2c2; background: linear-gradient(150deg, #3a382f, #161410); border: 1px solid #050403; border-radius: 6px; padding: 13px 18px; cursor: pointer !important; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.14), inset -2px -2px 4px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.4); }
     .hw-button:hover { color: var(--gold-solid); }
 
-    .float-mute {
-      position: fixed; bottom: 28px; right: 28px; z-index: 50;
-      font-family: var(--mono); font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase;
-      color: rgba(200,185,122,0.45); background: rgba(10,10,10,0.55);
-      border: 1px solid rgba(200,185,122,0.2); padding: 10px 18px; border-radius: 20px; cursor: pointer;
-      opacity: 0; pointer-events: none; transition: opacity 0.5s ease, color 0.3s, border-color 0.3s;
-    }
+    .float-mute { position: fixed; bottom: 28px; right: 28px; z-index: 50; font-family: var(--mono); font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(200,185,122,0.45); background: rgba(10,10,10,0.55); border: 1px solid rgba(200,185,122,0.2); padding: 10px 18px; border-radius: 20px; cursor: pointer !important; opacity: 0; pointer-events: none; transition: opacity 0.5s ease, color 0.3s, border-color 0.3s; }
     .float-mute.visible { opacity: 1; pointer-events: all; }
     .float-mute:hover { color: var(--gold-solid); border-color: rgba(200,185,122,0.5); }
 
     /* ── HERO ── */
-    .hero { flex-direction: column; text-align: center; background: var(--bg); perspective: 800px; }
+    .hero { flex-direction: column; text-align: center; background: var(--bg); }
     .hero-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; margin-bottom: 48px; }
-    .hero-name { font-size: clamp(64px, 13vw, 148px); font-weight: 400; line-height: 0.88; letter-spacing: -0.02em; transform-style: preserve-3d; }
-    .hero-name .light { color: rgba(232,228,220,0.12); font-style: italic; display: block; transform: translateZ(-20px); }
-    .hero-name .bold { display: block; transform: translateZ(20px); }
+    .hero-name { font-size: clamp(64px, 13vw, 148px); font-weight: 400; line-height: 0.88; letter-spacing: -0.02em; }
+    .hero-name .light { color: rgba(232,228,220,0.12); font-style: italic; display: block; }
+    .hero-name .bold { display: block; }
     .hero-sub { margin-top: 48px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em; }
 
     .scroll-hint { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0; animation: fadeIn 1s ease 1.4s forwards; }
@@ -301,7 +297,7 @@
     .acts { display: flex; align-items: center; gap: 48px; }
     .act { display: flex; flex-direction: column; align-items: center; gap: 14px; }
     .act-symbol { font-size: 28px; opacity: 0.45; line-height: 1; transition: opacity 0.4s, transform 0.4s; }
-    .act:hover .act-symbol { opacity: 0.9; transform: translateZ(20px) scale(1.1); }
+    .act:hover .act-symbol { opacity: 0.9; transform: scale(1.1); }
     .act-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; }
     .act-sep { font-size: 16px; color: rgba(232,228,220,0.08); padding-bottom: 20px; }
 
@@ -310,14 +306,10 @@
     .cierre-quote strong { color: var(--ink); font-weight: 400; }
     .cierre-sig { font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; }
     .cierre-links { display: flex; gap: 48px; justify-content: center; margin-top: 16px; }
-    .cierre-link {
-      font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
-      color: rgba(200,185,122,0.45); text-decoration: none; padding-bottom: 4px;
-      border-bottom: 1px solid rgba(200,185,122,0.15);
-      transition: color 0.3s, border-color 0.3s, transform 0.3s, text-shadow 0.3s;
-      display: inline-block;
-    }
+    .cierre-link { font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(200,185,122,0.45); text-decoration: none; padding-bottom: 4px; border-bottom: 1px solid rgba(200,185,122,0.15); transition: color 0.3s, border-color 0.3s, transform 0.3s, text-shadow 0.3s; display: inline-block; }
     .cierre-link:hover { color: var(--gold-solid); border-color: rgba(200,185,122,0.6); text-shadow: 0 0 10px rgba(200,185,122,0.6), 0 0 22px rgba(200,185,122,0.3); transform: translateY(-2px); }
+
+    #world { position: relative; z-index: 1; }
 
     @media (max-width: 760px) {
       section { padding: 60px 20px; }
@@ -332,12 +324,10 @@
       .steps { gap: 2px; }
       .controls-screen { justify-content: center; gap: 16px; padding: 14px; }
       .knobs-row { gap: 14px; justify-content: center; }
-
       .pillars-grid { grid-template-columns: 1fr; }
       .acts { flex-direction: column; gap: 28px; }
       .act-sep { transform: rotate(90deg); }
       .cierre-links { gap: 24px; flex-wrap: wrap; justify-content: center; }
-
       .hero-eyebrow { font-size: 13px; }
       .hero-sub { font-size: 13px; }
       .m-dim { color: rgba(232,228,220,0.45); }
@@ -363,15 +353,11 @@
   <!-- ── RECEPTION ── -->
   <section class="reception" id="reception">
     <p class="reception-eyebrow glow">El ritual de entrada</p>
-
     <div class="panel">
       <div class="panel-sheen"></div>
       <div class="brushed"></div>
-      <div class="screw tl"></div>
-      <div class="screw tr"></div>
-      <div class="screw bl"></div>
-      <div class="screw br"></div>
-
+      <div class="screw tl"></div><div class="screw tr"></div>
+      <div class="screw bl"></div><div class="screw br"></div>
       <div class="panel-header">
         <div class="brand-mark">SM</div>
         <div class="brand-text">
@@ -380,17 +366,14 @@
         </div>
         <div class="lcd"><div class="lcd-text" id="lcdText">STANDBY</div></div>
       </div>
-
       <div class="seq-screen">
         <div class="sequencer" id="sequencer"></div>
       </div>
-
       <div class="controls-screen">
         <div class="power-unit">
           <div class="power-btn" id="powerBtn"><div class="power-led"></div></div>
           <span class="power-label">Power</span>
         </div>
-
         <div class="knobs-row">
           <div class="knob" id="knobTempo">
             <svg class="knob-ring" viewBox="0 0 56 56"><circle class="knob-ring-bg" cx="28" cy="28" r="24"></circle><circle class="knob-ring-fg" cx="28" cy="28" r="24"></circle></svg>
@@ -417,19 +400,18 @@
             <div class="knob-value" id="knobToneValue">0</div>
           </div>
         </div>
-
         <button class="hw-button" id="mutateBtn">Mutar</button>
       </div>
     </div>
-
     <div class="scroll-hint"><span>Desplaza para entrar al teatro</span></div>
   </section>
 
   <div id="world">
-    <svg class="root-vine" id="rootVine" preserveAspectRatio="none">
-      <path id="rootVinePath"></path>
-      <circle id="rootVineDot" r="5"></circle>
-    </svg>
+
+    <!-- ── Notas musicales — columna vertebral ── -->
+    <div class="notes-column" id="notesColumn">
+      <div class="orb" id="orb"></div>
+    </div>
 
     <!-- ── HERO ── -->
     <section class="hero">
@@ -519,39 +501,33 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/15.3.5/Tone.js"></script>
   <script>
     // ── Cursor
-    const cursor = document.getElementById('cursor');
-    const ring   = document.getElementById('cursorRing');
+    const cursorEl = document.getElementById('cursor');
+    const ringEl   = document.getElementById('cursorRing');
     let mx = 0, my = 0, rx = 0, ry = 0;
     document.addEventListener('mousemove', e => {
       mx = e.clientX; my = e.clientY;
-      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+      cursorEl.style.left = mx + 'px'; cursorEl.style.top = my + 'px';
     });
     (function animRing() {
       rx += (mx - rx) * 0.1; ry += (my - ry) * 0.1;
-      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      ringEl.style.left = rx + 'px'; ringEl.style.top = ry + 'px';
       requestAnimationFrame(animRing);
     })();
 
-    const world = document.getElementById('world');
-
-    // ── Partículas flotantes
+    // ── Partículas
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
     let W2 = canvas.width = window.innerWidth;
     let H2 = canvas.height = window.innerHeight;
     window.addEventListener('resize', () => { W2 = canvas.width = window.innerWidth; H2 = canvas.height = window.innerHeight; });
-
     const PARTS = 55;
     const parts = Array.from({ length: PARTS }, () => ({
       x: Math.random() * W2, y: Math.random() * H2,
-      r: Math.random() * 1.2 + 0.2,
-      vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.12,
+      r: Math.random() * 1.2 + 0.2, vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.12,
       o: Math.random() * 0.18 + 0.04, depth: Math.random(),
     }));
-
     let scrollY = 0;
     window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
-
     (function drawParticles() {
       ctx.clearRect(0, 0, W2, H2);
       parts.forEach(p => {
@@ -560,7 +536,7 @@
         if (p.x < 0) p.x = W2; if (p.x > W2) p.x = 0;
         if (p.y < 0) p.y = H2; if (p.y > H2) p.y = 0;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(232,228,220,${p.o})`; ctx.fill();
+        ctx.fillStyle = 'rgba(232,228,220,' + p.o + ')'; ctx.fill();
       });
       requestAnimationFrame(drawParticles);
     })();
@@ -581,146 +557,192 @@
     });
 
     // ════════════════════════════════════════════════
-    // ── RAÍZ / VID — interactiva ──
+    // ── CAMINO DE NOTAS — columna vertebral interactiva ──
     // ════════════════════════════════════════════════
-    const vineSvg = document.getElementById('rootVine');
-    const vinePathEl = document.getElementById('rootVinePath');
-    const vineDot = document.getElementById('rootVineDot');
+    const NOTES_SYMBOLS = ['♩','♪','♫','♬','𝅗𝅥','𝄞'];
+    const WHISPERS = [
+      'Sigue mirando.', '¿Qué buscas aquí?', 'No todo se explica.',
+      'Acércate.', 'Esto también es el juego.', 'Insinúo, no explico.',
+      'El silencio también suena.', 'Primera la familia.'
+    ];
+
+    const world = document.getElementById('world');
+    const notesColumn = document.getElementById('notesColumn');
+    const orbEl = document.getElementById('orb');
     const whisperEl = document.getElementById('whisper');
-    let vineLength = 0;
-    let dotBaseX = 0, dotBaseY = 0;
-    let dotOffsetX = 0, dotOffsetY = 0;
-    let dotDragging = false;
-    let lastInteractionTime = Date.now();
+    const noteEls = [];
 
-    function buildVine() {
-      const worldWidth = world.offsetWidth;
-      const worldHeight = world.offsetHeight;
-      const sections = Array.from(world.querySelectorAll('section'));
-      const centerX = worldWidth / 2;
-      const wiggle = Math.min(60, worldWidth * 0.045);
+    function buildNotes() {
+      notesColumn.querySelectorAll('.music-note').forEach(n => n.remove());
+      noteEls.length = 0;
 
-      const points = sections.map((sec, i) => ({
-        x: centerX + (i % 2 === 0 ? -wiggle : wiggle),
-        y: sec.offsetTop + sec.offsetHeight / 2,
-      }));
+      const worldH = world.offsetHeight;
+      const worldW = world.offsetWidth;
+      const count = Math.floor(worldH / 180);
+      const centerX = worldW / 2;
 
-      vineSvg.setAttribute('viewBox', '0 0 ' + worldWidth + ' ' + worldHeight);
-      vineSvg.setAttribute('width', worldWidth);
-      vineSvg.setAttribute('height', worldHeight);
+      for (let i = 0; i < count; i++) {
+        const frac = i / (count - 1);
+        const wave = Math.sin(frac * Math.PI * 3.5) * Math.min(80, worldW * 0.07);
+        const x = centerX + wave;
+        const y = frac * worldH;
+        const size = 28 + Math.random() * 20;
+        const symbol = NOTES_SYMBOLS[i % NOTES_SYMBOLS.length];
 
-      let d = 'M ' + points[0].x + ' ' + points[0].y;
-      for (let i = 1; i < points.length; i++) {
-        const prev = points[i - 1];
-        const curr = points[i];
-        const midY = (prev.y + curr.y) / 2;
-        d += ' C ' + prev.x + ' ' + midY + ', ' + curr.x + ' ' + midY + ', ' + curr.x + ' ' + curr.y;
+        const el = document.createElement('div');
+        el.className = 'music-note';
+        el.textContent = symbol;
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.fontSize = size + 'px';
+        el.style.opacity = '0.12';
+
+        el.addEventListener('click', () => showWhisper(
+          el.getBoundingClientRect().left + el.offsetWidth / 2,
+          el.getBoundingClientRect().top
+        ));
+
+        notesColumn.appendChild(el);
+        noteEls.push({ el, x, y, size });
       }
-      vinePathEl.setAttribute('d', d);
+    }
 
-      vineSvg.querySelectorAll('.vine-node').forEach(n => n.remove());
-      points.forEach(p => {
-        const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        c.setAttribute('cx', String(p.x));
-        c.setAttribute('cy', String(p.y));
-        c.setAttribute('r', '7');
-        c.setAttribute('class', 'vine-node');
-        vineSvg.appendChild(c);
+    function updateNotes() {
+      const viewTop = window.scrollY - world.offsetTop;
+      const viewBot = viewTop + window.innerHeight;
+
+      noteEls.forEach(note => {
+        const inView = note.y > viewTop - 100 && note.y < viewBot + 100;
+        const justPassed = note.y > viewTop - 60 && note.y < viewTop + 120;
+
+        // Proximidad al orbe
+        const orbRect = orbEl.getBoundingClientRect();
+        const worldRect = world.getBoundingClientRect();
+        const orbWorldX = orbRect.left - worldRect.left + orbRect.width / 2;
+        const orbWorldY = orbRect.top - worldRect.top + orbRect.height / 2;
+        const dist = Math.hypot(note.x - orbWorldX, note.y - orbWorldY);
+        const near = dist < 90;
+
+        if (near) {
+          note.el.classList.add('near');
+          note.el.classList.remove('awake');
+        } else if (justPassed) {
+          note.el.classList.add('awake');
+          note.el.classList.remove('near');
+        } else if (inView) {
+          note.el.classList.remove('awake', 'near');
+        } else {
+          note.el.classList.remove('awake', 'near');
+        }
       });
-
-      vineLength = vinePathEl.getTotalLength();
     }
 
-    function updateVineBase() {
+    // Orbe viajero — sigue el scroll por la columna
+    let orbBaseX = 0, orbBaseY = 0;
+    let orbOffsetX = 0, orbOffsetY = 0;
+    let orbDragging = false;
+    let lastOrbInteraction = Date.now();
+
+    function updateOrbBase() {
+      const worldH = world.offsetHeight;
       const worldTop = world.offsetTop;
-      const worldHeight = world.offsetHeight;
-      let frac = (window.scrollY - worldTop + window.innerHeight / 2) / worldHeight;
+      let frac = (window.scrollY - worldTop + window.innerHeight * 0.45) / worldH;
       frac = Math.max(0, Math.min(1, frac));
-      const pt = vinePathEl.getPointAtLength(frac * vineLength);
-      dotBaseX = pt.x; dotBaseY = pt.y;
+
+      const worldW = world.offsetWidth;
+      const centerX = worldW / 2;
+      const wave = Math.sin(frac * Math.PI * 3.5) * Math.min(80, worldW * 0.07);
+
+      orbBaseX = centerX + wave;
+      orbBaseY = frac * worldH;
     }
 
-    window.addEventListener('load', () => { buildVine(); updateVineBase(); });
-    window.addEventListener('resize', () => { buildVine(); updateVineBase(); });
-    window.addEventListener('scroll', updateVineBase, { passive: true });
-    setTimeout(() => { buildVine(); updateVineBase(); }, 200);
+    let orbAnimX = 0, orbAnimY = 0;
 
-    const WHISPERS = ['Sigue mirando.', '¿Qué buscas aquí?', 'No todo se explica.', 'Acércate.', 'Esto también es el juego.', 'Insinúo, no explico.'];
-    let whisperTimeout;
-    function showWhisper(x, y) {
-      clearTimeout(whisperTimeout);
-      const msg = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
-      whisperEl.textContent = msg;
-      whisperEl.style.left = x + 'px';
-      whisperEl.style.top = y + 'px';
-      whisperEl.classList.add('visible');
-      whisperTimeout = setTimeout(() => whisperEl.classList.remove('visible'), 2400);
-    }
-
-    function startVineDrag(clientX, clientY) {
-      dotDragging = true;
-      lastInteractionTime = Date.now();
-      const dragStartX = clientX, dragStartY = clientY;
-      const startOffX = dotOffsetX, startOffY = dotOffsetY;
-      let dragMoved = false;
-
-      function onMove(cx2, cy2) {
-        if (Math.abs(cx2 - dragStartX) > 4 || Math.abs(cy2 - dragStartY) > 4) dragMoved = true;
-        dotOffsetX = startOffX + (cx2 - dragStartX);
-        dotOffsetY = startOffY + (cy2 - dragStartY);
-        lastInteractionTime = Date.now();
+    (function orbLoop() {
+      if (!orbDragging) {
+        orbOffsetX += (0 - orbOffsetX) * 0.06;
+        orbOffsetY += (0 - orbOffsetY) * 0.06;
       }
-      function mouseMove(ev) { onMove(ev.clientX, ev.clientY); }
-      function touchMove(ev) { const t = ev.touches[0]; onMove(t.clientX, t.clientY); }
-      function finish(cx2, cy2) {
-        dotDragging = false;
-        window.removeEventListener('mousemove', mouseMove);
-        window.removeEventListener('mouseup', mouseUp);
-        window.removeEventListener('touchmove', touchMove);
-        window.removeEventListener('touchend', touchEnd);
-        if (!dragMoved) showWhisper(cx2, cy2);
-      }
-      function mouseUp(ev) { finish(ev.clientX, ev.clientY); }
-      function touchEnd(ev) { finish(dragStartX, dragStartY); }
 
-      window.addEventListener('mousemove', mouseMove);
-      window.addEventListener('mouseup', mouseUp);
-      window.addEventListener('touchmove', touchMove, { passive: true });
-      window.addEventListener('touchend', touchEnd);
-    }
+      orbAnimX += (orbBaseX + orbOffsetX - orbAnimX) * 0.07;
+      orbAnimY += (orbBaseY + orbOffsetY - orbAnimY) * 0.07;
 
-    vineDot.addEventListener('mousedown', e => { startVineDrag(e.clientX, e.clientY); e.preventDefault(); });
-    vineDot.addEventListener('touchstart', e => { const t = e.touches[0]; startVineDrag(t.clientX, t.clientY); }, { passive: true });
+      orbEl.style.left = orbAnimX + 'px';
+      orbEl.style.top  = orbAnimY + 'px';
 
-    (function vineDotLoop() {
-      if (!dotDragging) {
-        dotOffsetX += (0 - dotOffsetX) * 0.08;
-        dotOffsetY += (0 - dotOffsetY) * 0.08;
-      }
-      const finalX = dotBaseX + dotOffsetX;
-      const finalY = dotBaseY + dotOffsetY;
-      vineDot.setAttribute('cx', String(finalX));
-      vineDot.setAttribute('cy', String(finalY));
-
-      const worldRect = world.getBoundingClientRect();
-      const screenX = worldRect.left + finalX;
-      const screenY = worldRect.top + finalY;
+      // Proximidad al mouse
+      const orbRect = orbEl.getBoundingClientRect();
+      const screenX = orbRect.left + orbRect.width / 2;
+      const screenY = orbRect.top  + orbRect.height / 2;
       const dist = Math.hypot(mx - screenX, my - screenY);
-      const proximity = Math.max(0, 1 - dist / 140);
+      const nearMouse = dist < 100;
 
-      const idle = (Date.now() - lastInteractionTime) > 1500;
-      const t1 = Date.now() * 0.0017, t2 = Date.now() * 0.00073;
-      const breathe = idle ? ((Math.sin(t1) * 0.5 + Math.sin(t2) * 0.3 + 0.5) / 1.8) : 0;
-      const intensity = Math.min(1, proximity * 0.9 + breathe * 0.4 + 0.35);
+      // Respiración suave cuando no hay interacción
+      const idle = (Date.now() - lastOrbInteraction) > 2000;
+      const t = Date.now() * 0.002;
+      const breathe = idle ? 0.4 + Math.sin(t) * 0.3 : 0;
 
-      vineDot.setAttribute('r', String(5 + intensity * 4));
-      vineDot.style.opacity = String(0.6 + intensity * 0.4);
+      orbEl.classList.toggle('excited', nearMouse || !idle);
 
-      requestAnimationFrame(vineDotLoop);
+      updateNotes();
+      requestAnimationFrame(orbLoop);
     })();
 
+    // Drag del orbe
+    function startOrbDrag(clientX, clientY) {
+      orbDragging = true;
+      lastOrbInteraction = Date.now();
+      const startX = clientX, startY = clientY;
+      const startOffX = orbOffsetX, startOffY = orbOffsetY;
+      let moved = false;
+
+      function onMove(cx, cy) {
+        const dx = cx - startX, dy = cy - startY;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
+        orbOffsetX = startOffX + dx;
+        orbOffsetY = startOffY + dy;
+        lastOrbInteraction = Date.now();
+      }
+      function onEnd(cx, cy) {
+        orbDragging = false;
+        if (!moved) showWhisper(cx, cy);
+        window.removeEventListener('mousemove', mm);
+        window.removeEventListener('mouseup', mu);
+        window.removeEventListener('touchmove', tm);
+        window.removeEventListener('touchend', te);
+      }
+      function mm(e) { onMove(e.clientX, e.clientY); }
+      function mu(e) { onEnd(e.clientX, e.clientY); }
+      function tm(e) { const t = e.touches[0]; onMove(t.clientX, t.clientY); }
+      function te(e) { onEnd(startX, startY); }
+
+      window.addEventListener('mousemove', mm);
+      window.addEventListener('mouseup', mu);
+      window.addEventListener('touchmove', tm, { passive: true });
+      window.addEventListener('touchend', te);
+    }
+
+    orbEl.addEventListener('mousedown', e => { startOrbDrag(e.clientX, e.clientY); e.preventDefault(); });
+    orbEl.addEventListener('touchstart', e => { const t = e.touches[0]; startOrbDrag(t.clientX, t.clientY); }, { passive: true });
+
+    let whisperTimer;
+    function showWhisper(screenX, screenY) {
+      clearTimeout(whisperTimer);
+      whisperEl.textContent = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
+      whisperEl.style.left = screenX + 'px';
+      whisperEl.style.top  = screenY + 'px';
+      whisperEl.classList.add('visible');
+      whisperTimer = setTimeout(() => whisperEl.classList.remove('visible'), 2600);
+    }
+
+    window.addEventListener('load', () => { buildNotes(); updateOrbBase(); });
+    window.addEventListener('resize', () => { buildNotes(); updateOrbBase(); });
+    window.addEventListener('scroll', () => { updateOrbBase(); }, { passive: true });
+    setTimeout(() => { buildNotes(); updateOrbBase(); }, 300);
+
     // ════════════════════════════════════════════════
-    // ── SECUENCIADOR — 8 pistas, Solo/FX/Tono/Voice ──
+    // ── SECUENCIADOR — 8 pistas ──
     // ════════════════════════════════════════════════
     const NUM_STEPS = 16;
     const pattern = {
@@ -733,229 +755,133 @@
       birds:  [0,0,0,0,0,0,0,1, 0,0,0,0,0,0,0,1],
       voice:  [0,0,0,0,1,0,0,0, 0,0,0,0,1,0,0,0],
     };
-    const TRACKS = ['kickA', 'kickB', 'hat', 'perc', 'bass', 'tribal', 'birds', 'voice'];
-    const TRACK_LABELS = { kickA: 'Kick A', kickB: 'Kick B', hat: 'Hat', perc: 'Perc', bass: 'Bass', tribal: 'Tribal', birds: 'Birds', voice: 'Voice' };
+    const TRACKS = ['kickA','kickB','hat','perc','bass','tribal','birds','voice'];
+    const TRACK_LABELS = { kickA:'Kick A', kickB:'Kick B', hat:'Hat', perc:'Perc', bass:'Bass', tribal:'Tribal', birds:'Birds', voice:'Voice' };
 
-    const mutes = {};
-    const solos = {};
-    const fxRouted = {};
-    TRACKS.forEach(t => {
-      mutes[t] = false;
-      solos[t] = false;
-      fxRouted[t] = !(t === 'kickA' || t === 'kickB');
-    });
+    const mutes = {}, solos = {}, fxRouted = {};
+    TRACKS.forEach(t => { mutes[t] = false; solos[t] = false; fxRouted[t] = false; });
     let anySolo = false;
-    function recalcAnySolo() { anySolo = TRACKS.some(t => solos[t]); }
-    function shouldPlay(t) {
-      if (mutes[t]) return false;
-      if (anySolo && !solos[t]) return false;
-      return true;
-    }
-
+    function recalcSolo() { anySolo = TRACKS.some(t => solos[t]); }
+    function shouldPlay(t) { if (mutes[t]) return false; if (anySolo && !solos[t]) return false; return true; }
     let voiceReversed = false;
 
     const seqEl = document.getElementById('sequencer');
     TRACKS.forEach(track => {
-      const row = document.createElement('div');
-      row.className = 'track-row';
+      const row = document.createElement('div'); row.className = 'track-row';
+      const lbl = document.createElement('div'); lbl.className = 'track-label'; lbl.textContent = TRACK_LABELS[track]; row.appendChild(lbl);
 
-      const label = document.createElement('div');
-      label.className = 'track-label';
-      label.textContent = TRACK_LABELS[track];
-      row.appendChild(label);
+      const tg = document.createElement('div'); tg.className = 'track-toggles';
 
-      const togglesWrap = document.createElement('div');
-      togglesWrap.className = 'track-toggles';
+      const muteBtn = document.createElement('div'); muteBtn.className = 'track-toggle'; muteBtn.textContent = 'M';
+      muteBtn.addEventListener('click', () => { mutes[track] = !mutes[track]; muteBtn.classList.toggle('mute-active', mutes[track]); });
+      tg.appendChild(muteBtn);
 
-      const muteBtn = document.createElement('div');
-      muteBtn.className = 'track-toggle';
-      muteBtn.textContent = 'M';
-      muteBtn.addEventListener('click', () => {
-        mutes[track] = !mutes[track];
-        muteBtn.classList.toggle('mute-active', mutes[track]);
-      });
-      togglesWrap.appendChild(muteBtn);
+      const soloBtn = document.createElement('div'); soloBtn.className = 'track-toggle'; soloBtn.textContent = 'S';
+      soloBtn.addEventListener('click', () => { solos[track] = !solos[track]; soloBtn.classList.toggle('solo-active', solos[track]); recalcSolo(); });
+      tg.appendChild(soloBtn);
 
-      const soloBtn = document.createElement('div');
-      soloBtn.className = 'track-toggle';
-      soloBtn.textContent = 'S';
-      soloBtn.addEventListener('click', () => {
-        solos[track] = !solos[track];
-        soloBtn.classList.toggle('solo-active', solos[track]);
-        recalcAnySolo();
-      });
-      togglesWrap.appendChild(soloBtn);
-
-      const fxBtn = document.createElement('div');
-      fxBtn.className = 'track-toggle';
-      fxBtn.textContent = 'FX';
-      fxBtn.classList.toggle('fx-active', fxRouted[track]);
+      const fxBtn = document.createElement('div'); fxBtn.className = 'track-toggle'; fxBtn.textContent = 'FX';
       fxBtn.addEventListener('click', () => {
-        fxRouted[track] = !fxRouted[track];
-        fxBtn.classList.toggle('fx-active', fxRouted[track]);
-        if (contextStarted && synths[track]) {
-          synths[track].disconnect();
-          connectByRouting(track, synths[track]);
-        }
+        fxRouted[track] = !fxRouted[track]; fxBtn.classList.toggle('fx-active', fxRouted[track]);
+        if (contextStarted && synths[track]) { synths[track].disconnect(); connectByRoute(track, synths[track]); }
       });
-      togglesWrap.appendChild(fxBtn);
+      tg.appendChild(fxBtn);
 
       if (track === 'voice') {
-        const revBtn = document.createElement('div');
-        revBtn.className = 'track-toggle';
-        revBtn.textContent = 'REV';
-        revBtn.style.width = '20px';
-        revBtn.addEventListener('click', () => {
-          voiceReversed = !voiceReversed;
-          revBtn.classList.toggle('rev-active', voiceReversed);
-          applyVoiceEnvelope();
-        });
-        togglesWrap.appendChild(revBtn);
+        const revBtn = document.createElement('div'); revBtn.className = 'track-toggle'; revBtn.textContent = 'REV'; revBtn.style.width = '20px';
+        revBtn.addEventListener('click', () => { voiceReversed = !voiceReversed; revBtn.classList.toggle('rev-active', voiceReversed); applyVoiceEnv(); });
+        tg.appendChild(revBtn);
       }
 
-      row.appendChild(togglesWrap);
+      row.appendChild(tg);
 
-      const led = document.createElement('div');
-      led.className = 'track-led';
-      led.dataset.track = track;
-      row.appendChild(led);
+      const led = document.createElement('div'); led.className = 'track-led'; led.dataset.track = track; row.appendChild(led);
 
-      const stepsWrap = document.createElement('div');
-      stepsWrap.className = 'steps';
+      const stepsWrap = document.createElement('div'); stepsWrap.className = 'steps';
       for (let i = 0; i < NUM_STEPS; i++) {
         const step = document.createElement('div');
         step.className = 'step' + (pattern[track][i] ? ' active' : '') + (i % 4 === 0 ? ' beat' : '');
-        step.dataset.track = track;
-        step.dataset.index = String(i);
-        step.addEventListener('click', () => {
-          pattern[track][i] = pattern[track][i] ? 0 : 1;
-          step.classList.toggle('active');
-        });
+        step.dataset.track = track; step.dataset.index = String(i);
+        step.addEventListener('click', () => { pattern[track][i] = pattern[track][i] ? 0 : 1; step.classList.toggle('active'); });
         stepsWrap.appendChild(step);
       }
       row.appendChild(stepsWrap);
-
       seqEl.appendChild(row);
     });
 
     function flashLed(track) {
       const led = document.querySelector('.track-led[data-track="' + track + '"]');
-      if (!led) return;
-      led.classList.add('lit');
-      setTimeout(() => led.classList.remove('lit'), 90);
+      if (!led) return; led.classList.add('lit'); setTimeout(() => led.classList.remove('lit'), 90);
     }
 
     const lcdText = document.getElementById('lcdText');
     let currentBpm = 122;
     function updateLcd(step) {
-      const stepText = (typeof step === 'number')
-        ? 'STEP ' + String(step + 1).padStart(2, '0') + '/16'
-        : 'STEP --/16';
-      lcdText.textContent = Math.round(currentBpm) + ' BPM · ' + stepText;
+      lcdText.textContent = Math.round(currentBpm) + ' BPM · ' + (typeof step === 'number' ? 'STEP ' + String(step + 1).padStart(2,'0') + '/16' : 'STEP --/16');
     }
     function updatePlayhead(step) {
-      document.querySelectorAll('.step').forEach(el => {
-        el.classList.toggle('playhead', parseInt(el.dataset.index, 10) === step);
-      });
+      document.querySelectorAll('.step').forEach(el => el.classList.toggle('playhead', parseInt(el.dataset.index, 10) === step));
       updateLcd(step);
     }
 
-    let contextStarted = false;
-    let isPlaying = false;
+    let contextStarted = false, isPlaying = false;
     let filterNode, delayNode, toneEQ, seq;
     const synths = {};
-    const birdNotes = ['C7', 'D7', 'E7', 'G7', 'A7'];
+    const birdNotes = ['C7','D7','E7','G7','A7'];
 
-    function connectByRouting(track, synthRef) {
-      if (fxRouted[track]) synthRef.connect(filterNode);
-      else synthRef.connect(toneEQ);
+    function connectByRoute(track, s) {
+      if (fxRouted[track]) s.connect(filterNode); else s.connect(toneEQ);
     }
 
-    function applyVoiceEnvelope() {
+    function applyVoiceEnv() {
       if (!synths.voice) return;
-      if (voiceReversed) {
-        synths.voice.set({ envelope: { attack: 0.45, decay: 0.05, sustain: 0, release: 0.06 } });
-      } else {
-        synths.voice.set({ envelope: { attack: 0.04, decay: 0.25, sustain: 0.25, release: 0.45 } });
-      }
+      synths.voice.set({ envelope: voiceReversed
+        ? { attack: 0.45, decay: 0.05, sustain: 0, release: 0.06 }
+        : { attack: 0.04, decay: 0.25, sustain: 0.25, release: 0.45 }
+      });
     }
 
     function buildAudio() {
       toneEQ = new Tone.EQ3({ low: 0, mid: 0, high: 0 }).toDestination();
-
       filterNode = new Tone.Filter(900, 'lowpass');
-      delayNode = new Tone.FeedbackDelay('8n', 0.3);
-      delayNode.wet.value = 0.25;
-      filterNode.connect(delayNode);
-      delayNode.connect(toneEQ);
+      delayNode = new Tone.FeedbackDelay('8n', 0.3); delayNode.wet.value = 0.25;
+      filterNode.connect(delayNode); delayNode.connect(toneEQ);
 
-      synths.kickA = new Tone.MembraneSynth({
-        pitchDecay: 0.05, octaves: 6,
-        envelope: { attack: 0.001, decay: 0.35, sustain: 0 },
-      });
-      connectByRouting('kickA', synths.kickA);
-
-      synths.kickB = new Tone.MembraneSynth({
-        pitchDecay: 0.02, octaves: 4,
-        envelope: { attack: 0.001, decay: 0.18, sustain: 0 },
-      });
-      connectByRouting('kickB', synths.kickB);
-
-      synths.hat = new Tone.NoiseSynth({
-        noise: { type: 'white' },
-        envelope: { attack: 0.001, decay: 0.04, sustain: 0 },
-      });
-      connectByRouting('hat', synths.hat);
-
-      synths.perc = new Tone.MetalSynth({
-        frequency: 220,
-        envelope: { attack: 0.001, decay: 0.15, release: 0.05 },
-        harmonicity: 5.1, modulationIndex: 16, resonance: 3000, octaves: 1.2,
-      });
-      connectByRouting('perc', synths.perc);
-
-      synths.bass = new Tone.Synth({
-        oscillator: { type: 'sine' },
-        envelope: { attack: 0.02, decay: 0.3, sustain: 0.15, release: 0.5 },
-      });
-      connectByRouting('bass', synths.bass);
-
+      synths.kickA = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 6, envelope: { attack: 0.001, decay: 0.35, sustain: 0 } });
+      connectByRoute('kickA', synths.kickA);
+      synths.kickB = new Tone.MembraneSynth({ pitchDecay: 0.02, octaves: 4, envelope: { attack: 0.001, decay: 0.18, sustain: 0 } });
+      connectByRoute('kickB', synths.kickB);
+      synths.hat = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.04, sustain: 0 } });
+      connectByRoute('hat', synths.hat);
+      synths.perc = new Tone.MetalSynth({ frequency: 220, envelope: { attack: 0.001, decay: 0.15, release: 0.05 }, harmonicity: 5.1, modulationIndex: 16, resonance: 3000, octaves: 1.2 });
+      connectByRoute('perc', synths.perc);
+      synths.bass = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.02, decay: 0.3, sustain: 0.15, release: 0.5 } });
+      connectByRoute('bass', synths.bass);
       synths.tribal = new Tone.PluckSynth({ attackNoise: 1, dampening: 1800, resonance: 0.85 });
-      connectByRouting('tribal', synths.tribal);
+      connectByRoute('tribal', synths.tribal);
+      synths.birds = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.005, decay: 0.12, sustain: 0, release: 0.05 }, portamento: 0.03 });
+      connectByRoute('birds', synths.birds);
 
-      synths.birds = new Tone.Synth({
-        oscillator: { type: 'sine' },
-        envelope: { attack: 0.005, decay: 0.12, sustain: 0, release: 0.05 },
-        portamento: 0.03,
-      });
-      connectByRouting('birds', synths.birds);
-
-      const voiceFormant = new Tone.Filter(900, 'bandpass');
-      const voiceVibrato = new Tone.Vibrato(5.5, 0.15);
-      synths.voice = new Tone.Synth({
-        oscillator: { type: 'sawtooth' },
-        envelope: { attack: 0.04, decay: 0.25, sustain: 0.25, release: 0.45 },
-      });
-      synths.voice.chain(voiceFormant, voiceVibrato);
-      if (fxRouted.voice) voiceVibrato.connect(filterNode);
-      else voiceVibrato.connect(toneEQ);
-      synths.voiceVibrato = voiceVibrato;
+      const vForm = new Tone.Filter(900, 'bandpass');
+      const vVib  = new Tone.Vibrato(5.5, 0.15);
+      synths.voice = new Tone.Synth({ oscillator: { type: 'sawtooth' }, envelope: { attack: 0.04, decay: 0.25, sustain: 0.25, release: 0.45 } });
+      synths.voice.chain(vForm, vVib);
+      if (fxRouted.voice) vVib.connect(filterNode); else vVib.connect(toneEQ);
 
       Tone.Transport.bpm.value = currentBpm;
-
       seq = new Tone.Sequence((time, step) => {
-        if (pattern.kickA[step] && shouldPlay('kickA')) { synths.kickA.triggerAttackRelease('C1', '8n', time); Tone.Draw.schedule(() => flashLed('kickA'), time); }
-        if (pattern.kickB[step] && shouldPlay('kickB')) { synths.kickB.triggerAttackRelease('C2', '8n', time); Tone.Draw.schedule(() => flashLed('kickB'), time); }
-        if (pattern.hat[step] && shouldPlay('hat')) { synths.hat.triggerAttackRelease('16n', time); Tone.Draw.schedule(() => flashLed('hat'), time); }
-        if (pattern.perc[step] && shouldPlay('perc')) { synths.perc.triggerAttackRelease('16n', time); Tone.Draw.schedule(() => flashLed('perc'), time); }
-        if (pattern.bass[step] && shouldPlay('bass')) { synths.bass.triggerAttackRelease('D1', '4n', time); Tone.Draw.schedule(() => flashLed('bass'), time); }
+        if (pattern.kickA[step]  && shouldPlay('kickA'))  { synths.kickA.triggerAttackRelease('C1', '8n', time);  Tone.Draw.schedule(() => flashLed('kickA'),  time); }
+        if (pattern.kickB[step]  && shouldPlay('kickB'))  { synths.kickB.triggerAttackRelease('C2', '8n', time);  Tone.Draw.schedule(() => flashLed('kickB'),  time); }
+        if (pattern.hat[step]    && shouldPlay('hat'))    { synths.hat.triggerAttackRelease('16n', time);          Tone.Draw.schedule(() => flashLed('hat'),    time); }
+        if (pattern.perc[step]   && shouldPlay('perc'))   { synths.perc.triggerAttackRelease('16n', time);         Tone.Draw.schedule(() => flashLed('perc'),   time); }
+        if (pattern.bass[step]   && shouldPlay('bass'))   { synths.bass.triggerAttackRelease('D1', '4n', time);    Tone.Draw.schedule(() => flashLed('bass'),   time); }
         if (pattern.tribal[step] && shouldPlay('tribal')) { synths.tribal.triggerAttackRelease('G2', '16n', time); Tone.Draw.schedule(() => flashLed('tribal'), time); }
-        if (pattern.birds[step] && shouldPlay('birds')) {
+        if (pattern.birds[step]  && shouldPlay('birds'))  {
           const note = birdNotes[Math.floor(Math.random() * birdNotes.length)];
           synths.birds.triggerAttackRelease(note, '32n', time);
           Tone.Draw.schedule(() => flashLed('birds'), time);
         }
-        if (pattern.voice[step] && shouldPlay('voice')) {
+        if (pattern.voice[step]  && shouldPlay('voice'))  {
           synths.voice.triggerAttackRelease('A3', voiceReversed ? '4n' : '8n', time);
           Tone.Draw.schedule(() => flashLed('voice'), time);
         }
@@ -964,123 +890,78 @@
     }
 
     const powerBtn = document.getElementById('powerBtn');
-
     async function togglePower(e) {
       if (e) e.preventDefault();
       if (!contextStarted) {
         await Tone.start();
-        buildAudio();
-        seq.start(0);
-        contextStarted = true;
+        buildAudio(); seq.start(0); contextStarted = true;
       }
       if (isPlaying) {
-        Tone.Transport.stop();
-        isPlaying = false;
-        powerBtn.classList.remove('on');
-        updateLcd();
+        Tone.Transport.stop(); isPlaying = false; powerBtn.classList.remove('on'); updateLcd();
       } else {
-        Tone.Transport.start();
-        isPlaying = true;
-        powerBtn.classList.add('on');
+        Tone.Transport.start(); isPlaying = true; powerBtn.classList.add('on');
       }
     }
     powerBtn.addEventListener('touchend', togglePower);
     powerBtn.addEventListener('click', togglePower);
 
+    // ── Fix iOS/Android: reanuda contexto si el sistema lo suspendió
+    document.addEventListener('touchstart', () => {
+      if (contextStarted && Tone.context.state === 'suspended') Tone.context.resume();
+    }, { passive: true });
+    document.addEventListener('click', () => {
+      if (contextStarted && Tone.context.state === 'suspended') Tone.context.resume();
+    });
+
     const RING_C = 2 * Math.PI * 24;
     const RING_TRACK = RING_C * 0.75;
-
     function setupKnob(el, opts) {
       const min = opts.min, max = opts.max;
       let value = opts.initial;
       const indicator = el.querySelector('.knob-indicator');
       const ringFg = el.querySelector('.knob-ring-fg');
       const valueLabel = document.getElementById(opts.valueId);
-
-      function angleFor(v) {
-        const t = (v - min) / (max - min);
-        return -135 + t * 270;
-      }
       function render() {
         const t = (value - min) / (max - min);
-        indicator.style.transform = 'rotate(' + angleFor(value) + 'deg)';
-        const len = RING_TRACK * t;
-        ringFg.style.strokeDasharray = len + ' ' + (RING_C - len);
+        indicator.style.transform = 'rotate(' + (-135 + t * 270) + 'deg)';
+        ringFg.style.strokeDasharray = (RING_TRACK * t) + ' ' + (RING_C - RING_TRACK * t);
         valueLabel.textContent = opts.format(value);
         opts.onChange(value);
       }
-
       let dragging = false, startY = 0, startValue = 0;
       function start(y) { dragging = true; startY = y; startValue = value; }
-      function move(y) {
-        if (!dragging) return;
-        const delta = startY - y;
-        const range = max - min;
-        const sensitivity = range / 160;
-        value = Math.min(max, Math.max(min, startValue + delta * sensitivity));
-        render();
-      }
+      function move(y) { if (!dragging) return; value = Math.min(max, Math.max(min, startValue + (startY - y) * (max - min) / 160)); render(); }
       function end() { dragging = false; }
-
       el.addEventListener('mousedown', e => { start(e.clientY); e.preventDefault(); });
       window.addEventListener('mousemove', e => move(e.clientY));
       window.addEventListener('mouseup', end);
       el.addEventListener('touchstart', e => start(e.touches[0].clientY), { passive: true });
       window.addEventListener('touchmove', e => { if (dragging) move(e.touches[0].clientY); }, { passive: true });
       window.addEventListener('touchend', end);
-
       render();
     }
 
-    setupKnob(document.getElementById('knobTempo'), {
-      min: 90, max: 140, initial: 122,
-      valueId: 'knobTempoValue',
-      format: v => String(Math.round(v)),
-      onChange: v => { currentBpm = v; if (contextStarted) Tone.Transport.bpm.value = v; if (!isPlaying) updateLcd(); },
-    });
-    setupKnob(document.getElementById('knobFilter'), {
-      min: 200, max: 4000, initial: 900,
-      valueId: 'knobFilterValue',
-      format: v => String(Math.round(v)) + 'hz',
-      onChange: v => { if (filterNode) filterNode.frequency.value = v; },
-    });
-    setupKnob(document.getElementById('knobDelay'), {
-      min: 0, max: 0.7, initial: 0.25,
-      valueId: 'knobDelayValue',
-      format: v => String(Math.round((v / 0.7) * 100)) + '%',
-      onChange: v => { if (delayNode) delayNode.wet.value = v; },
-    });
-    setupKnob(document.getElementById('knobTone'), {
-      min: -8, max: 8, initial: 0,
-      valueId: 'knobToneValue',
-      format: v => (v > 0 ? '+' : '') + Math.round(v),
-      onChange: v => { if (toneEQ) { toneEQ.high.value = v; toneEQ.low.value = -v * 0.6; } },
-    });
+    setupKnob(document.getElementById('knobTempo'), { min: 90, max: 140, initial: 122, valueId: 'knobTempoValue', format: v => String(Math.round(v)), onChange: v => { currentBpm = v; if (contextStarted) Tone.Transport.bpm.value = v; if (!isPlaying) updateLcd(); } });
+    setupKnob(document.getElementById('knobFilter'), { min: 200, max: 4000, initial: 900, valueId: 'knobFilterValue', format: v => String(Math.round(v)) + 'hz', onChange: v => { if (filterNode) filterNode.frequency.value = v; } });
+    setupKnob(document.getElementById('knobDelay'), { min: 0, max: 0.7, initial: 0.25, valueId: 'knobDelayValue', format: v => String(Math.round((v / 0.7) * 100)) + '%', onChange: v => { if (delayNode) delayNode.wet.value = v; } });
+    setupKnob(document.getElementById('knobTone'), { min: -8, max: 8, initial: 0, valueId: 'knobToneValue', format: v => (v > 0 ? '+' : '') + Math.round(v), onChange: v => { if (toneEQ) { toneEQ.high.value = v; toneEQ.low.value = -v * 0.6; } } });
 
     document.getElementById('mutateBtn').addEventListener('click', () => {
-      ['hat', 'perc', 'tribal'].forEach(track => {
-        for (let i = 0; i < NUM_STEPS; i++) {
-          if (Math.random() < 0.18) pattern[track][i] = pattern[track][i] ? 0 : 1;
-        }
+      ['hat','perc','tribal'].forEach(track => {
+        for (let i = 0; i < NUM_STEPS; i++) { if (Math.random() < 0.18) pattern[track][i] = pattern[track][i] ? 0 : 1; }
       });
       document.querySelectorAll('.step').forEach(el => {
-        const t = el.dataset.track;
-        const i = parseInt(el.dataset.index, 10);
-        el.classList.toggle('active', !!pattern[t][i]);
+        el.classList.toggle('active', !!pattern[el.dataset.track][parseInt(el.dataset.index, 10)]);
       });
     });
 
     const floatMute = document.getElementById('floatMute');
     const receptionSection = document.getElementById('reception');
     let muted = false;
-    window.addEventListener('scroll', () => {
-      const rect = receptionSection.getBoundingClientRect();
-      floatMute.classList.toggle('visible', rect.bottom < 0);
-    }, { passive: true });
+    window.addEventListener('scroll', () => { floatMute.classList.toggle('visible', receptionSection.getBoundingClientRect().bottom < 0); }, { passive: true });
     floatMute.addEventListener('click', () => {
       if (!contextStarted) return;
-      muted = !muted;
-      Tone.Destination.mute = muted;
+      muted = !muted; Tone.Destination.mute = muted;
       floatMute.textContent = muted ? 'Reanudar' : 'Silenciar';
     });
   </script>
